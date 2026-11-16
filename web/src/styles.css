@@ -1,0 +1,66 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: #f5f7fb;
+}
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #e8f1ff 0%, #f7fbff 45%, #eef4ff 100%);
+}
+
+.login-card {
+  width: 420px;
+  box-shadow: 0 18px 50px rgba(24, 71, 150, 0.12);
+}
+
+.app-logo {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-size: 16px;
+}
+
+.app-header {
+  background: #fff;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.page-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.grid-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px;
+}
+
+.signature-canvas {
+  width: 100%;
+  height: 180px;
+  border: 1px dashed #b9c3d6;
+  border-radius: 8px;
+  background: #fff;
+  touch-action: none;
+}
+
+.muted {
+  color: #8c96a8;
+}
