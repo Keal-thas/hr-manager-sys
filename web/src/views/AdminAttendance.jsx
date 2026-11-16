@@ -83,11 +83,11 @@ export default function AdminAttendance() {
     }
   };
 
-  const loadRecords = async (page = recordPage, size = recordSize, status = recordStatus, keyword = recordKeyword) => {
-    if (!recordBatch) return;
+  const loadRecords = async (page = recordPage, size = recordSize, status = recordStatus, keyword = recordKeyword, batch = recordBatch) => {
+    if (!batch) return;
     setRecordsLoading(true);
     try {
-      const data = await api.get(`/admin/attendance/batches/${recordBatch.id}/records`, {
+      const data = await api.get(`/admin/attendance/batches/${batch.id}/records`, {
         params: { page, size, status, keyword }
       });
       setRecords(data.records || []);
@@ -103,7 +103,7 @@ export default function AdminAttendance() {
     setRecordPage(1);
     setRecordStatus(undefined);
     setRecordKeyword('');
-    setTimeout(() => loadRecords(1, recordSize, undefined, ''), 0);
+    loadRecords(1, recordSize, undefined, '', batch);
   };
 
   const openDetail = async (id) => {

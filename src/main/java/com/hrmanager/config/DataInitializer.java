@@ -75,7 +75,7 @@ public class DataInitializer implements CommandLineRunner {
         SysUser li = user("10004", "李四", "Emp123456", hrService.getId(), employeeRole.getId(),
                 "13800000004", "li@example.com");
 
-        YearMonth ym = YearMonth.now();
+        YearMonth ym = YearMonth.now().minusMonths(1);
         AttendanceBatch batch = new AttendanceBatch();
         batch.setBatchYear(ym.getYear());
         batch.setBatchMonth(ym.getMonthValue());
