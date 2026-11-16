@@ -2,7 +2,6 @@ target/
 .idea/
 *.iml
 .vscode/
-.local/
 tmp.docx
 data/
 *.log
