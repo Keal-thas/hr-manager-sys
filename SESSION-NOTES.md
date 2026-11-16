@@ -406,7 +406,18 @@ npm run build
 
 ## 6. 公有发布
 
-源仓库保持 private. 另一个 public release 仓库用于存放密码保护的压缩包.
+源仓库保持 private. 公有 Release 仓库:
+
+```text
+https://github.com/Keal-thas/hr-manager-sys-release
+```
+
+包含两个密码保护的压缩包:
+
+```text
+hr-manager-sys-code-v1.0.0.zip   # 源码, 前端, 静态资源, 文档, 转换工具
+hr-manager-sys-spec-v1.0.0.zip   # 转换后的需求 Markdown, 章节, 图片, Excel 附件
+```
 
 压缩包密码由项目所有者单独提供, 不写入仓库.
 

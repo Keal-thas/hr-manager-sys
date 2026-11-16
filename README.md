@@ -226,6 +226,16 @@ mvn test
 
 集成测试使用 H2 内存库, 不依赖外部 MySQL.
 
+## 公有 Release
+
+密码保护的压缩包在单独的公有仓库:
+
+```text
+https://github.com/Keal-thas/hr-manager-sys-release
+```
+
+压缩包密码由项目所有者单独提供, 不写入仓库.
+
 ## 说明
 
 - 仓库不包含原始需求文档和 docx 文件.
