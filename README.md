@@ -43,6 +43,13 @@ java -jar target/hr-manager-sys-0.0.1-SNAPSHOT.jar
 http://localhost:8080
 ```
 
+接口文档:
+
+```text
+http://localhost:8080/swagger-ui.html
+http://localhost:8080/v3/api-docs
+```
+
 H2 控制台:
 
 ```text
@@ -177,7 +184,49 @@ src/main/resources
 web/                  React 源码
 ```
 
+## 开发与工作流
+
+- [docs/](docs/README.md): 文档索引
+- [docs/DATA-MODEL.md](docs/DATA-MODEL.md): ER 图, 表结构, 枚举, 索引
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): 模块, 登录/考勤/通知流程
+- [docs/API.md](docs/API.md): 接口清单和示例
+- [docs/TESTING.md](docs/TESTING.md): 测试策略和冒烟清单
+- [docs/SECURITY.md](docs/SECURITY.md): 认证, 密码, 上传, 密钥
+- [docs/DECISIONS.md](docs/DECISIONS.md): 关键决策记录
+- [docs/CODING-RULES.md](docs/CODING-RULES.md): 编码约束
+- [docs/RELEASE.md](docs/RELEASE.md): 私有源码和公有压缩包流程
+- [WORKFLOW.md](WORKFLOW.md): 强制开发流程, hook, CI, 数据库和提交规则
+- [AGENTS.md](AGENTS.md): AI agent 必读规则
+- [SESSION-NOTES.md](SESSION-NOTES.md): 本次交付, 设计取舍, 冒烟结果和后续事项
+
+首次设置:
+
+```bash
+bash scripts/install-hooks.sh
+cd web && npm ci && cd ..
+```
+
+提交前:
+
+```bash
+mvn -q -DskipTests compile
+```
+
+推送前:
+
+```bash
+bash scripts/check.sh
+```
+
+## 测试
+
+```bash
+mvn test
+```
+
+集成测试使用 H2 内存库, 不依赖外部 MySQL.
+
 ## 说明
 
 - 仓库不包含原始需求文档和 docx 文件.
-- `data/`, `target/`, `.local/`, `web/node_modules/` 已在 `.gitignore` 中忽略.
+- `data/`, `target/`, `web/node_modules/` 已在 `.gitignore` 中忽略.

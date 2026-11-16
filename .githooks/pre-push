@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(git rev-parse --show-toplevel)"
+
+echo "[pre-push] backend tests"
+mvn -q test
+
+echo "[pre-push] frontend build"
+if [ -d web/node_modules ]; then
+  (cd web && npm run build)
+else
+  echo "web/node_modules not found, run: cd web && npm ci"
+  exit 1
+fi
+
+echo "[pre-push] verify static assets are committed"
+if ! git diff --quiet -- src/main/resources/static; then
+  echo "ERROR: frontend build changed src/main/resources/static"
+  git status --short src/main/resources/static
+  echo "Commit the rebuilt static assets before pushing."
+  exit 1
+fi
+
+echo "[pre-push] ok"
