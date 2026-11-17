@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: hr-manager-sys
+    orgId: 1
+    folder: HR Manager
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    options:
+      path: /var/lib/grafana/dashboards

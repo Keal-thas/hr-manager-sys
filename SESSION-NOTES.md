@@ -275,7 +275,7 @@ sys_message
   - 考勤管理 (上传/明细/提醒/异常/导出)
   - 通知发布/模板
   - 部门/角色/用户管理
-- 构建产物输出到 `src/main/resources/static`
+- 构建产物输出到 `src/main/resources/static`, 该目录 git 忽略
 - 开发时 Vite 代理 `/api` 到 8080
 
 ### 3.8 默认账号
@@ -385,24 +385,22 @@ npm run build
 
 ## 5. 未验证 / 后续
 
-- 浏览器真实点击级 E2E
 - 部门/角色/用户全部增删改边界
 - 考勤异常清单上传
-- 考勤 Excel 导出下载
-- 连续 5 次密码错误锁定
-- MySQL profile
+- MySQL profile 自动集成测试
 - 5000 条导入和 5000 人消息性能
 - 非管理员前端页面级权限隔离
-- 自动化测试
+- 跨浏览器 E2E 矩阵
+- Alertmanager 真实告警通知
 
 建议后续:
 
-1. 增加 Spring Boot 集成测试和前端 E2E
-2. 消息发送改异步
-3. 签名图片改对象存储
-4. 考勤导入改批量插入
-5. 把文档家族规则抽成 profile
-6. 增加 MySQL 迁移脚本版本管理
+1. 消息发送改异步
+2. 签名图片改对象存储
+3. 考勤导入改批量插入
+4. 把文档家族规则抽成 profile
+5. 增加 MySQL 迁移脚本版本管理
+6. 增加性能基线和压测脚本
 
 ## 6. 公有发布
 
@@ -437,3 +435,257 @@ hr-manager-sys-spec-v1.0.0.zip   # 转换后的需求 Markdown, 章节, 图片, 
 - `data/`
 - `web/node_modules/`
 - 转换后的需求文档输出
+
+## 7. 开发流程完善
+
+本轮只完善开发流程, 不新增业务功能.
+
+### 7.1 自动化测试
+
+后端新增:
+
+```text
+AuthApiTests             登录, 锁定, 改密, 登出, 401
+AttendanceApiTests       批次, 明细, 确认, 模板, 导出
+NoticeMessageApiTests    通知, 消息, 模板
+AdminApiTests            部门, 角色, 用户, 初始密码
+PasswordPolicyTest       密码规则
+SchemaConsistencyTest    H2/MySQL schema 对齐
+MonitoringApiTests       Actuator health, metrics, prometheus
+AbstractApiTest          MockMvc 和登录辅助
+```
+
+前端新增:
+
+```text
+web/src/api.test.js      Axios 响应拦截和错误提示
+```
+
+测试数据使用 H2 内存库. 会写库的用例使用 `@Transactional` 回滚, 不污染其他用例.
+
+### 7.2 质量门禁
+
+- JaCoCo 生成覆盖率报告 `target/site/jacoco/index.html`
+- Maven Enforcer 校验 JDK 8 和 Maven 3.9+
+- `SchemaConsistencyTest` 阻止 H2/MySQL schema 漂移
+- `scripts/check.sh` 统一本地检查: 前端测试和构建, 确认构建产物未被跟踪, 后端 verify
+- `mvn package` 检查 `src/main/resources/static/index.html`, 防止打出没有页面的 jar
+- pre-push 执行前端测试和构建, 检查构建产物未被跟踪, 再执行后端 verify
+
+### 7.3 CI/CD
+
+- `ci.yml`: 后端 test, 前端 test/build, package job 下载前端产物后打包 jar
+- 校验 `src/main/resources/static` 没有被 git 跟踪
+- `release.yml`: 推送 `v*` tag 后先构建前端, 再执行完整校验并发布 jar 和 sha256
+- `dependabot.yml`: 每周检查 Maven, npm, GitHub Actions 依赖
+- `pull_request_template.md`: 固定检查清单
+- CI 开启并发取消和超时, 减少无效运行
+
+### 7.4 验证
+
+```text
+cd web && npm test      6 tests, 0 failures
+cd web && npm run build 成功
+mvn -B -ntp verify      36 tests, 0 failures
+cd web && npm run e2e   11 passed
+```
+
+构建产物已从 git 跟踪中移除, `src/main/resources/static` 只保留在本地和打包产物中.
+
+
+## 8. 本轮增强: E2E, 前端设计, Agent 工作流, 监控
+
+本轮在原有 MVP 和测试基础上补齐交付质量, 不改核心业务规则.
+
+### 8.1 后端监控
+
+新增依赖:
+
+```text
+spring-boot-starter-actuator
+micrometer-registry-prometheus
+```
+
+新增代码:
+
+```text
+common/BusinessMetrics.java
+  登录, 改密, 考勤上传/确认/提醒, 异常导入, 通知, 消息计数
+
+config/MetricsConfig.java
+  有效用户, 有效部门, 考勤批次, 未确认考勤, 未读消息 Gauge
+```
+
+配置:
+
+```text
+application.yml
+  /actuator/health
+  /actuator/info
+  /actuator/metrics
+  /actuator/prometheus
+  HTTP P50/P95/P99 直方图
+  application=hr-manager-sys 公共标签
+```
+
+测试:
+
+```text
+support/MonitoringApiTests
+  health UP
+  prometheus 含 hr_auth_login_total
+  prometheus 含 hr_users_active
+  prometheus 含 http_server_requests_seconds
+  metrics 目录可读
+```
+
+### 8.2 前端设计
+
+新增:
+
+```text
+web/src/theme.js
+web/src/layouts/AppLayout.jsx
+web/src/components/ErrorBoundary.jsx
+```
+
+调整:
+
+- 登录页改为左右分栏品牌页, 移动端单列
+- 侧栏支持折叠和响应式断点
+- 统一头部, 内容最大宽度, 页脚
+- 页面渲染错误由 ErrorBoundary 兜底
+- 浏览器标题跟随当前页面
+- Vite 拆分 react / antd / axios chunk
+- 关键交互元素补 `data-testid`
+
+构建结果:
+
+```text
+index.html       0.55 kB
+index.css        6.14 kB
+react chunk      0.03 kB
+index chunk     43.44 kB
+axios chunk     59.15 kB
+antd chunk    1119.12 kB
+```
+
+### 8.3 Playwright E2E
+
+新增:
+
+```text
+web/playwright.config.js
+web/e2e/01-auth.spec.js
+web/e2e/02-employee-attendance.spec.js
+web/e2e/03-admin.spec.js
+web/e2e/support/auth.js
+scripts/e2e-server.sh
+scripts/e2e.sh
+src/main/resources/application-e2e.yml
+```
+
+特点:
+
+- 端口 18080, H2 内存库, 每次启动重置数据
+- 本机默认复用系统 Chrome, CI 使用 Playwright Chromium
+- 失败保留 trace 和 screenshot
+- `npm run e2e` 自动 build 前端并启动后端
+
+覆盖 11 个用例:
+
+```text
+登录页, 错误密码, 管理员菜单, 退出后 401
+员工考勤阅读, 勾选, canvas 签名, 确认成功
+消息列表, 全部已读, 个人资料保存
+管理员用户/部门浏览, 发布通知, 下载模板, 查看明细
+Actuator health 和 prometheus
+```
+
+### 8.4 Agent 工作流
+
+新增:
+
+```text
+docs/AGENT-WORKFLOW.md
+scripts/agent-check.sh
+```
+
+检查分层:
+
+```bash
+bash scripts/agent-check.sh quick      # 后端编译 + 前端单测
+bash scripts/agent-check.sh standard   # scripts/check.sh
+bash scripts/agent-check.sh full       # standard + E2E
+```
+
+文档包含任务分类, 每个任务的步骤, 完成定义和交接模板.
+
+### 8.5 监控栈
+
+新增:
+
+```text
+ops/monitoring/docker-compose.yml
+ops/monitoring/prometheus.yml
+ops/monitoring/alert-rules.yml
+ops/monitoring/grafana/provisioning/datasources/prometheus.yml
+ops/monitoring/grafana/provisioning/dashboards/dashboards.yml
+ops/monitoring/grafana/dashboards/hr-manager-overview.json
+```
+
+能力:
+
+- Prometheus 抓取 `/actuator/prometheus`
+- Grafana 自动加载 HR Manager Overview
+- 面板覆盖 5xx, P95, QPS, 登录结果, 考勤/通知业务量, 未读, JVM, CPU
+- 告警规则覆盖 5xx, 登录失败突增, 考勤积压, 应用不可达
+
+### 8.6 文档
+
+新增:
+
+```text
+docs/MONITORING.md
+docs/FRONTEND.md
+docs/AGENT-WORKFLOW.md
+```
+
+更新:
+
+```text
+README.md
+AGENTS.md
+WORKFLOW.md
+docs/README.md
+docs/ARCHITECTURE.md
+docs/API.md
+docs/TESTING.md
+docs/CODING-RULES.md
+.github/workflows/ci.yml
+```
+
+### 8.7 验证结果
+
+```text
+mvn -B -ntp verify          36 tests, 0 failures, BUILD SUCCESS
+cd web && npm test          6 tests, 0 failures
+cd web && npm run build     success
+cd web && npm run e2e       11 passed
+docker compose config       ok
+/actuator/health            200
+/actuator/prometheus        200
+```
+
+jar 已生成:
+
+```text
+target/hr-manager-sys-0.0.1-SNAPSHOT.jar
+```
+
+### 8.8 已知限制
+
+- 本机没有下载 Playwright 自带 Chromium, 使用系统 Chrome; CI 会安装
+- 监控栈 compose 配置已校验; 本机 Docker daemon 未运行, 未实际启动容器
+- 告警规则未接 Alertmanager
+- E2E 只跑 Chromium

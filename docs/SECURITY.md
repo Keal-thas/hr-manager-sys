@@ -79,10 +79,28 @@
 
 公有 Release 仓库只放密码保护的压缩包. 密码不写入仓库.
 
+## 9.1 Actuator 暴露面
+
+`/actuator/health`, `/actuator/metrics`, `/actuator/prometheus` 默认不经过 `/api/**` 登录拦截器.
+
+风险:
+
+- `/actuator/prometheus` 会暴露应用名, 接口路径, JVM, 数据库连接池等运行信息
+- `/actuator/health` 在 `show-details: always` 时会返回组件细节
+
+生产要求:
+
+- 只在内网或管理网暴露
+- 反向代理限制来源 IP
+- 或使用独立管理端口 `management.server.port=8081`
+- 不要把 Actuator 暴露到公网
+- 按需把 `management.endpoint.health.show-details` 改为 `when-authorized` 或 `never`
+
 ## 10. 生产检查清单
 
 - 关闭 H2 控制台
 - 关闭或限制 Swagger UI
+- 限制 Actuator 暴露面, 只允许监控系统访问
 - 使用 HTTPS
 - 修改默认账号密码
 - 使用独立数据库账号, 最小权限

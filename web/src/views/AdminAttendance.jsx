@@ -144,7 +144,7 @@ export default function AdminAttendance() {
   const download = (path) => window.open(path, '_blank');
 
   return (
-    <div>
+    <div data-testid="admin-attendance-page">
       <Card title="上传考勤">
         <Form
           form={uploadForm}
@@ -222,7 +222,7 @@ export default function AdminAttendance() {
               title: '操作',
               render: (_, row) => (
                 <Space wrap>
-                  <Button size="small" onClick={() => openRecords(row)}>明细</Button>
+                  <Button size="small" onClick={() => openRecords(row)} data-testid="attendance-records-open">明细</Button>
                   <Button size="small" onClick={() => openPenalties(row)}>异常</Button>
                   <Button size="small" onClick={() => remind(row, 'ATTENDANCE')}>提醒</Button>
                   <Button size="small" danger onClick={() => remind(row, 'ABNORMAL')}>异常提醒</Button>

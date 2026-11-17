@@ -50,15 +50,32 @@ bash scripts/check.sh
 
 `check.sh` 会执行:
 
-1. `mvn test`
+1. `cd web && npm test`: 前端单元测试
 2. `cd web && npm run build`
-3. 检查 `src/main/resources/static` 是否已提交
+3. 检查 `src/main/resources/static` 没有被 git 跟踪
+4. `mvn -B -ntp verify`: 后端测试 + JaCoCo 覆盖率 + 打包
+
+先构建前端再执行 Maven, 保证打出的 jar 包含最新前端.
+
+分档检查:
+
+```bash
+bash scripts/agent-check.sh quick      # 编译 + 前端单测
+bash scripts/agent-check.sh standard   # check.sh
+bash scripts/agent-check.sh full       # check.sh + E2E
+```
+
+E2E:
+
+```bash
+cd web && npm run e2e
+```
 
 ## 4. Git hooks
 
 ### pre-commit
 
-- 拒绝 `tmp.docx`, `data/`, `target/`, `web/node_modules/`, `__pycache__/`, 私钥, `.env`
+- 拒绝 `tmp.docx`, `data/`, `target/`, `web/node_modules/`, `src/main/resources/static/`, `__pycache__/`, 私钥, `.env`
 - 拒绝大于 10 MB 的文件
 - 扫描疑似密钥
 - `git diff --check` 空白检查
@@ -66,9 +83,10 @@ bash scripts/check.sh
 
 ### pre-push
 
-- `mvn test`
+- `npm test`
 - `npm run build`
-- 如果构建改变了 `src/main/resources/static`, 拒绝推送
+- 如果 `src/main/resources/static` 被 git 跟踪, 拒绝推送
+- `mvn -B -ntp verify`
 
 如果确实需要临时跳过, 必须得到项目所有者同意, 不要默认使用 `--no-verify`.
 
@@ -98,6 +116,8 @@ test: add login test
 - 不提交无关格式化
 - 不提交生成目录
 - 不提交原始需求 docx
+- PR 使用 `.github/pull_request_template.md` 的检查清单
+- PR 必须等 CI 通过后再合并
 
 ## 6. 数据库变更
 
@@ -141,37 +161,73 @@ H2 和 MySQL 必须保持一致. 开发环境 H2 使用 `MODE=MySQL`.
 - 新增页面沿用现有布局和表格风格.
 - 修改后执行:
   ```bash
-  cd web && npm run build
+  cd web && npm test && npm run build
   ```
-- 提交 `src/main/resources/static` 的构建结果.
+- `src/main/resources/static` 是构建产物, 已被 git 忽略, 不要提交.
+- 构建 jar 前必须先构建前端, 否则 jar 里没有页面.
+- `mvn package` 会检查 `src/main/resources/static/index.html`, 缺失会直接失败.
 - 不要手工编辑构建产物.
 
 ## 9. 测试
 
 - 后端行为变更必须补测试.
-- 当前测试:
+- 当前后端测试:
   ```text
-  HrManagerApplicationTests
+  HrManagerApplicationTests     上下文, 登录, OpenAPI
+  AuthApiTests                  登录, 锁定, 改密, 登出, 401
+  AttendanceApiTests            批次, 明细, 签名确认, 模板, 导出
+  NoticeMessageApiTests         通知发布, 消息已读, 模板生命周期
+  AdminApiTests                 部门, 角色, 用户, 初始密码强制修改
+  PasswordPolicyTest            密码规则
+  SchemaConsistencyTest         H2 与 MySQL schema 一致性
   ```
+- 当前前端测试:
+  ```text
+  web/src/api.test.js           Axios 响应拦截, 错误提示, 401 事件
+  ```
+- 当前 E2E:
+  ```text
+  web/e2e/01-auth.spec.js                 登录, 菜单, 退出
+  web/e2e/02-employee-attendance.spec.js  考勤签名, 消息, 资料
+  web/e2e/03-admin.spec.js                用户/部门, 通知, 模板, 监控
+  ```
+- E2E 使用 `application-e2e.yml`, H2 内存库, 端口 18080.
+- 本机默认用系统 Chrome; CI 用 Playwright Chromium.
+- 监控测试在 `MonitoringApiTests`.
 - 集成测试使用 `src/test/resources/application-test.yml` 的 H2 内存库.
-- `mvn test` 必须通过.
+- 需要修改数据的测试使用 `@Transactional`, 结束后回滚.
+- `mvn -B -ntp verify` 必须通过.
+- `cd web && npm test` 必须通过.
+- JaCoCo 报告在 `target/site/jacoco/index.html`.
 - 不允许为了过 CI 删除或弱化测试.
 
-## 10. CI
+## 10. CI/CD
 
 GitHub Actions:
 
 ```text
-.github/workflows/ci.yml
+.github/workflows/ci.yml        push / PR / 手动触发
+.github/workflows/release.yml   v* tag 自动发布
+.github/dependabot.yml          每周依赖更新
+.github/pull_request_template.md
 ```
 
-包含:
+CI 包含:
 
-- 后端 `mvn -B -q test`
-- 前端 `npm ci && npm run build`
-- 校验静态资源已提交
+- 后端 JDK 8: `mvn -B -ntp test`, 上传 surefire 和 JaCoCo 报告
+- 前端 Node 20: `npm ci`, `npm test`, `npm run build`
+- 校验 `src/main/resources/static` 没有被 git 跟踪
+- e2e job 安装 Playwright Chromium 后执行 `npm run e2e`
+- package job 下载前端产物后执行 `mvn -DskipTests package`, 上传 jar
+- 同一分支新的 push 会取消旧的 CI 运行
 
-PR 必须等 CI 通过.
+Release:
+
+- 推送 `v*` tag 时先构建前端, 再执行完整校验
+- 成功后把 jar 和 sha256 校验文件附加到 GitHub Release
+- 公有 Release 仓库的密码压缩包仍由项目所有者手动维护
+
+PR 必须等 CI 通过. 不要绕过 CI 直接合入.
 
 ## 11. 安全
 
@@ -194,8 +250,11 @@ PR 必须等 CI 通过.
 Agent 必须:
 
 - 先读 `AGENTS.md`, `README.md`, `WORKFLOW.md`, `SESSION-NOTES.md`
+- 按 `docs/AGENT-WORKFLOW.md` 的任务分类执行
 - 遵守 JDK 8 限制
-- 修改后运行检查
+- 修改后运行 `bash scripts/agent-check.sh quick|standard|full`
+- 前端改动补 `data-testid` 和 E2E 断言
+- 业务事件改动补 `BusinessMetrics` 和监控测试
 - 更新文档
 - 不绕过 hooks
 - 不提交禁止文件
@@ -207,7 +266,7 @@ Agent 不允许:
 - 擅自加企业微信或其他外部集成
 - 擅自删除测试
 - 擅自改变 API 返回结构
-- 手工修改 `src/main/resources/static`
+- 修改或提交 `src/main/resources/static` 构建产物
 
 ## 13. 发布
 
@@ -223,11 +282,18 @@ https://github.com/Keal-thas/hr-manager-sys
 
 ```bash
 bash scripts/check.sh
-mvn -DskipTests package
-java -jar target/hr-manager-sys-0.0.1-SNAPSHOT.jar
 ```
 
-冒烟:
+自动发布:
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+`release.yml` 会先构建前端, 再执行 `mvn verify`, 生成带版本号的 jar 和 sha256, 并创建 GitHub Release.
+
+手工冒烟:
 
 ```text
 /api/health

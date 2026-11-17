@@ -53,6 +53,7 @@ export default function MyMessages() {
 
   return (
     <Card
+      data-testid="my-messages-page"
       title="消息通知"
       extra={<Button onClick={readAll}>全部已读</Button>}
     >

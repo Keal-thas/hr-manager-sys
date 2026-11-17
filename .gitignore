@@ -6,4 +6,7 @@ tmp.docx
 data/
 *.log
 web/node_modules/
+src/main/resources/static/
 .DS_Store
+web/test-results/
+web/playwright-report/

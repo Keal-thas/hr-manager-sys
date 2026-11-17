@@ -9,7 +9,7 @@ if [ -z "$staged" ]; then
 fi
 
 echo "[pre-commit] check staged paths"
-forbidden='^(tmp\.docx|data/|target/|web/node_modules/|.*__pycache__/|\.env|.*\.pem|.*\.key|.*id_rsa.*)$'
+forbidden='^(tmp\.docx|data/|target/|web/node_modules/|src/main/resources/static/|.*__pycache__/|\.env|.*\.pem|.*\.key|.*id_rsa.*)$'
 if echo "$staged" | grep -Eq "$forbidden"; then
   echo "ERROR: forbidden generated or secret file staged:"
   echo "$staged" | grep -E "$forbidden" || true

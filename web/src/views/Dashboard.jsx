@@ -24,7 +24,7 @@ export default function Dashboard({ session }) {
   }
 
   return (
-    <div>
+    <div data-testid="dashboard-page">
       <Row gutter={[16, 16]}>
         <Col xs={24} md={6}>
           <Card><Statistic title="有效用户" value={data.userCount} /></Card>

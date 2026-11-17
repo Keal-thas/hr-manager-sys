@@ -1,5 +1,7 @@
 # 人事综合管理系统
 
+[![CI](https://github.com/Keal-thas/hr-manager-sys/actions/workflows/ci.yml/badge.svg)](https://github.com/Keal-thas/hr-manager-sys/actions/workflows/ci.yml)
+
 一个简化的 HR 管理系统, 覆盖考勤确认, 消息通知, 部门/角色/用户管理和权限菜单.
 
 需求来源是一份较粗的需求文档, 本项目按"能开发, 能演示, 保持简单"的原则做了取舍, 没有实现企业微信等外部集成.
@@ -11,6 +13,10 @@
 - MyBatis Plus 3.5.7
 - H2 (开发默认) / MySQL 8 (生产)
 - React 18 + Vite + Ant Design 5
+- Vitest (前端单元测试)
+- Playwright (浏览器 E2E)
+- Spring Boot Actuator + Micrometer + Prometheus
+- Prometheus + Grafana (可选监控栈)
 - Apache POI (Excel 导入导出)
 - BCrypt 密码加密
 
@@ -23,14 +29,29 @@
 - 考勤管理: 月度考勤 Excel 上传 (新增/覆盖/增量), 明细查看, 提醒, 异常清单上传, 导出
 - 通知管理: 全员/部门/指定员工发布, 通知模板
 - 系统管理: 部门树, 角色权限, 用户管理, 重置密码, 启停用
+- 可观测性: 健康检查, JVM/HTTP 指标, 业务计数, Prometheus 抓取, Grafana 面板
+- 质量保障: 后端集成测试, 前端单元测试, Playwright E2E, CI 三档校验
 
 ## 快速启动
+
+前端构建产物不提交到 git. 先构建前端:
+
+```bash
+cd web
+npm ci
+npm run build
+cd ..
+```
+
+打包时会检查 `src/main/resources/static/index.html`, 缺失会直接失败.
+
+开发模式:
 
 ```bash
 mvn spring-boot:run
 ```
 
-或者:
+或者打包运行:
 
 ```bash
 mvn -DskipTests package
@@ -49,6 +70,23 @@ http://localhost:8080
 http://localhost:8080/swagger-ui.html
 http://localhost:8080/v3/api-docs
 ```
+
+监控:
+
+```text
+http://localhost:8080/actuator/health
+http://localhost:8080/actuator/metrics
+http://localhost:8080/actuator/prometheus
+```
+
+本地 Prometheus + Grafana:
+
+```bash
+cd ops/monitoring
+docker compose up -d
+```
+
+Grafana: `http://localhost:3000`, Prometheus: `http://localhost:9090`.
 
 H2 控制台:
 
@@ -72,7 +110,7 @@ Password: 留空
 
 ## 前端开发
 
-前端源码在 `web/`, 构建产物输出到 `src/main/resources/static/`.
+前端源码在 `web/`, 构建产物输出到 `src/main/resources/static/`. 这个目录只用于本地构建和打包, 已被 git 忽略.
 
 ```bash
 cd web
@@ -86,16 +124,42 @@ npm run dev
 
 ```bash
 cd web
+npm test
 npm run build
+cd ..
 mvn -DskipTests package
 ```
+
+浏览器 E2E:
+
+```bash
+cd web
+npm run e2e
+```
+
+默认使用本机 Chrome. 没有 Chrome 时:
+
+```bash
+cd web
+npx playwright install chromium
+E2E_CHANNEL=bundled npm run e2e
+```
+
+CI 使用 Playwright Chromium.
 
 ## MySQL 部署
 
 1. 创建数据库 `hr_manager`
 2. 执行 `src/main/resources/schema-mysql.sql`
 3. 修改 `src/main/resources/application-prod.yml` 的连接信息
-4. 启动:
+4. 构建前端并打包:
+
+```bash
+cd web && npm ci && npm run build && cd ..
+mvn -DskipTests package
+```
+
+5. 启动:
 
 ```bash
 java -jar target/hr-manager-sys-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
@@ -180,8 +244,12 @@ src/main/java/com/hrmanager
 src/main/resources
   schema.sql          H2
   schema-mysql.sql    MySQL
-  static/             React 构建产物
+  static/             React 构建产物, git 忽略
+src/test/java        后端集成测试和单元测试
 web/                  React 源码
+web/e2e/              Playwright E2E
+ops/monitoring/       Prometheus, Grafana, 告警规则
+.github/workflows/   CI 和 Release
 ```
 
 ## 开发与工作流
@@ -191,6 +259,9 @@ web/                  React 源码
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): 模块, 登录/考勤/通知流程
 - [docs/API.md](docs/API.md): 接口清单和示例
 - [docs/TESTING.md](docs/TESTING.md): 测试策略和冒烟清单
+- [docs/FRONTEND.md](docs/FRONTEND.md): 前端结构, 设计系统, E2E 选择器
+- [docs/MONITORING.md](docs/MONITORING.md): 指标, Prometheus, Grafana, 告警
+- [docs/AGENT-WORKFLOW.md](docs/AGENT-WORKFLOW.md): AI agent 任务工作流
 - [docs/SECURITY.md](docs/SECURITY.md): 认证, 密码, 上传, 密钥
 - [docs/DECISIONS.md](docs/DECISIONS.md): 关键决策记录
 - [docs/CODING-RULES.md](docs/CODING-RULES.md): 编码约束
@@ -218,13 +289,54 @@ mvn -q -DskipTests compile
 bash scripts/check.sh
 ```
 
+`check.sh` 会依次执行前端 `npm test`, 前端构建, 检查 `src/main/resources/static` 没有被 git 跟踪, 最后执行后端 `mvn verify`.
+
+CI 在 `.github/workflows/ci.yml`, 打 `v*` tag 时由 `.github/workflows/release.yml` 自动构建并发布 jar. 依赖更新由 Dependabot 每周检查.
+
 ## 测试
+
+后端:
 
 ```bash
 mvn test
 ```
 
-集成测试使用 H2 内存库, 不依赖外部 MySQL.
+完整校验 (测试 + JaCoCo 覆盖率 + 打包):
+
+```bash
+mvn -B -ntp verify
+```
+
+覆盖率报告:
+
+```text
+target/site/jacoco/index.html
+```
+
+前端:
+
+```bash
+cd web
+npm test
+npm run build
+```
+
+E2E:
+
+```bash
+cd web
+npm run e2e
+```
+
+三档 agent 检查:
+
+```bash
+bash scripts/agent-check.sh quick
+bash scripts/agent-check.sh standard
+bash scripts/agent-check.sh full
+```
+
+集成测试使用 H2 内存库, 不依赖外部 MySQL. `SchemaConsistencyTest` 会校验 `schema.sql` 和 `schema-mysql.sql` 的表和列保持一致.
 
 ## 公有 Release
 
@@ -239,4 +351,5 @@ https://github.com/Keal-thas/hr-manager-sys-release
 ## 说明
 
 - 仓库不包含原始需求文档和 docx 文件.
-- `data/`, `target/`, `web/node_modules/` 已在 `.gitignore` 中忽略.
+- `data/`, `target/`, `web/node_modules/`, `src/main/resources/static/` 已在 `.gitignore` 中忽略.
+- git 只跟踪源码, 构建产物不提交.

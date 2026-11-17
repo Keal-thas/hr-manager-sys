@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hrmanager.common.BusinessException;
+import com.hrmanager.common.BusinessMetrics;
 import com.hrmanager.common.PageResult;
 import com.hrmanager.common.Req;
 import com.hrmanager.dept.service.DepartmentService;
@@ -37,6 +38,7 @@ public class NoticeService {
     private final SysUserMapper userMapper;
     private final DepartmentService departmentService;
     private final MessageService messageService;
+    private final BusinessMetrics metrics;
 
     @Transactional
     public Map<String, Object> publish(Map<String, Object> body, Long publisherId) {
@@ -66,6 +68,7 @@ public class NoticeService {
         for (SysUser user : users) {
             messageService.send(user.getId(), "NOTICE", title, content, notice.getId());
         }
+        metrics.noticePublished(targetType.toUpperCase(), users.size());
         if (Req.bool(body, "saveAsTemplate")) {
             NoticeTemplate template = new NoticeTemplate();
             template.setTitle(title);

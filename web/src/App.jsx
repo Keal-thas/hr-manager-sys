@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, Layout, Menu, Modal, Space, Spin, Tag, message } from 'antd';
-import { LogoutOutlined, UserOutlined } from '@ant-design/icons';
+import { Button, Form, Input, Modal, Space, Spin, message } from 'antd';
+import { LockOutlined } from '@ant-design/icons';
 import api from './api';
+import AppLayout from './layouts/AppLayout';
+import ErrorBoundary from './components/ErrorBoundary';
 import Login from './views/Login';
 import Dashboard from './views/Dashboard';
 import MyAttendance from './views/MyAttendance';
@@ -10,8 +12,6 @@ import Profile from './views/Profile';
 import AdminAttendance from './views/AdminAttendance';
 import AdminNotices from './views/AdminNotices';
 import AdminSystem from './views/AdminSystem';
-
-const { Header, Sider, Content } = Layout;
 
 const titles = {
   dashboard: '首页',
@@ -50,6 +50,10 @@ export default function App() {
     }
   }, [session]);
 
+  useEffect(() => {
+    document.title = session ? `${titles[view] || '首页'} · 人事综合管理系统` : '人事综合管理系统';
+  }, [session, view]);
+
   const logout = async () => {
     try {
       await api.post('/auth/logout');
@@ -73,7 +77,14 @@ export default function App() {
   };
 
   if (loading) {
-    return <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}><Spin size="large" /></div>;
+    return (
+      <div className="app-loading">
+        <Space direction="vertical" align="center" size={12}>
+          <Spin size="large" />
+          <span className="muted">正在加载系统...</span>
+        </Space>
+      </div>
+    );
   }
 
   if (!session) {
@@ -110,28 +121,17 @@ export default function App() {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Sider width={220} theme="dark">
-        <div className="app-logo">HR MANAGER</div>
-        <Menu
-          theme="dark"
-          mode="inline"
-          selectedKeys={[view]}
-          onClick={(event) => setView(event.key)}
-          items={menus.map((item) => ({ key: item.code, label: item.name }))}
-        />
-      </Sider>
-      <Layout>
-        <Header className="app-header">
-          <div className="page-title">{titles[view] || '人事综合管理系统'}</div>
-          <Space>
-            <Tag icon={<UserOutlined />} color="blue">{session.user.name}</Tag>
-            <span className="muted">{session.user.roleName}</span>
-            <Button icon={<LogoutOutlined />} onClick={logout}>退出</Button>
-          </Space>
-        </Header>
-        <Content style={{ padding: 20 }}>{renderView()}</Content>
-      </Layout>
+    <>
+      <AppLayout
+        session={session}
+        menus={menus}
+        titles={titles}
+        view={view}
+        onNavigate={setView}
+        onLogout={logout}
+      >
+        <ErrorBoundary>{renderView()}</ErrorBoundary>
+      </AppLayout>
 
       <Modal
         title="请修改初始密码"
@@ -146,14 +146,14 @@ export default function App() {
             <Input.Password />
           </Form.Item>
           <Form.Item name="newPassword" label="新密码" rules={[{ required: true, message: '请输入新密码' }]}>
-            <Input.Password placeholder="8-50 位，包含大写、小写和数字" />
+            <Input.Password prefix={<LockOutlined />} placeholder="8-50 位，包含大写、小写和数字" />
           </Form.Item>
           <Form.Item name="confirmPassword" label="确认新密码" rules={[{ required: true, message: '请再次输入新密码' }]}>
             <Input.Password />
           </Form.Item>
-          <Button type="primary" htmlType="submit" block>确认修改</Button>
+          <Button type="primary" htmlType="submit" block data-testid="initial-password-submit">确认修改</Button>
         </Form>
       </Modal>
-    </Layout>
+    </>
   );
 }

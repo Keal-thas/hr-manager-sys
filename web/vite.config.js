@@ -11,6 +11,20 @@ export default defineConfig({
   },
   build: {
     outDir: '../src/main/resources/static',
-    emptyOutDir: true
+    emptyOutDir: true,
+    chunkSizeWarningLimit: 1200,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom'],
+          antd: ['antd', '@ant-design/icons'],
+          axios: ['axios']
+        }
+      }
+    }
+  },
+  test: {
+    environment: 'node',
+    include: ['src/**/*.test.js']
   }
 });

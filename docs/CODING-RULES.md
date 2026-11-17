@@ -45,7 +45,11 @@ Entity      Xxx
 - 表格分页由后端控制.
 - 表单提交后刷新列表.
 - 不手工编辑 `src/main/resources/static`.
-- 修改后执行 `npm run build`.
+- `src/main/resources/static` 是构建产物, 不提交到 git.
+- 新交互元素加 `data-testid`, 供 Playwright 使用.
+- 设计 token 放在 `web/src/theme.js` 和 `web/src/styles.css`.
+- 修改后执行 `npm test && npm run build`.
+- 主流程改动执行 `npm run e2e`.
 
 ## 5. Git
 
@@ -63,9 +67,20 @@ Entity      Xxx
 - `docs/DATA-MODEL.md` 如果表结构变化
 - `docs/API.md` 如果接口变化
 - `docs/ARCHITECTURE.md` 如果模块或流程变化
+- `docs/FRONTEND.md` 如果前端结构或选择器约定变化
+- `docs/MONITORING.md` 如果指标, 告警或监控端点变化
+- `docs/AGENT-WORKFLOW.md` 如果检查分层或 agent 流程变化
 - `SESSION-NOTES.md` 如果交付范围变化
 
-## 7. DOCX 工具
+## 7. 监控
+
+- 业务事件统一走 `BusinessMetrics`.
+- 指标标签只放低基数字段.
+- 禁止把用户 ID, 工号, 时间戳放进标签.
+- 新增 DB 快照指标放 `MetricsConfig`.
+- 新增业务指标同步更新 `docs/MONITORING.md`.
+
+## 8. DOCX 工具
 
 - 位置 `.local/export-pandoc/`.
 - 修改转换规则时更新 `conversion-guide.md`.

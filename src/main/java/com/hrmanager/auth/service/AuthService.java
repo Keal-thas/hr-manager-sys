@@ -1,6 +1,7 @@
 package com.hrmanager.auth.service;
 
 import com.hrmanager.common.BusinessException;
+import com.hrmanager.common.BusinessMetrics;
 import com.hrmanager.common.LoginUser;
 import com.hrmanager.dept.entity.SysDepartment;
 import com.hrmanager.dept.mapper.SysDepartmentMapper;
@@ -29,23 +30,28 @@ public class AuthService {
     private final SysDepartmentMapper departmentMapper;
     private final RoleService roleService;
     private final PasswordEncoder passwordEncoder;
+    private final BusinessMetrics metrics;
 
     @Transactional
     public Map<String, Object> login(String employeeNo, String password) {
         if (!StringUtils.hasText(employeeNo) || !StringUtils.hasText(password)) {
+            metrics.login("invalid");
             throw new BusinessException("请输入工号和密码");
         }
         SysUser user = userMapper.selectOne(com.baomidou.mybatisplus.core.toolkit.Wrappers.<SysUser>lambdaQuery()
                 .eq(SysUser::getEmployeeNo, employeeNo.trim())
                 .last("limit 1"));
         if (user == null) {
+            metrics.login("unknown_user");
             throw new BusinessException("工号不存在，请重新输入");
         }
         if (!"ACTIVE".equals(user.getStatus())) {
+            metrics.login("disabled");
             throw new BusinessException("账号已停用");
         }
         LocalDateTime now = LocalDateTime.now();
         if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(now)) {
+            metrics.login("locked");
             throw new BusinessException("密码错误5次，请稍后再试");
         }
         if (!passwordEncoder.matches(password, user.getPassword())) {
@@ -55,10 +61,12 @@ public class AuthService {
                 user.setFailedAttempts(0);
                 user.setLockedUntil(now.plusMinutes(15));
                 userMapper.updateById(user);
+                metrics.login("locked");
                 throw new BusinessException("密码错误5次，请稍后再试");
             }
             user.setFailedAttempts(attempts);
             userMapper.updateById(user);
+            metrics.login("bad_password");
             throw new BusinessException("密码错误，请重新输入");
         }
         user.setFailedAttempts(0);
@@ -71,6 +79,7 @@ public class AuthService {
         result.put("permissions", loginUser.getPermissions());
         result.put("mustChangePassword", loginUser.isMustChangePassword());
         result.put("menus", com.hrmanager.common.Menus.forPermissions(loginUser.getPermissions()));
+        metrics.login("success");
         return result;
     }
 
@@ -97,6 +106,16 @@ public class AuthService {
 
     @Transactional
     public void changePassword(Long userId, String oldPassword, String newPassword) {
+        try {
+            doChangePassword(userId, oldPassword, newPassword);
+            metrics.passwordChange("success");
+        } catch (BusinessException ex) {
+            metrics.passwordChange("failure");
+            throw ex;
+        }
+    }
+
+    private void doChangePassword(Long userId, String oldPassword, String newPassword) {
         SysUser user = userMapper.selectById(userId);
         if (user == null) {
             throw new BusinessException(401, "用户不存在");

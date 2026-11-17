@@ -27,7 +27,7 @@ flowchart LR
 | 实体 | `*/entity` | 表映射 |
 | 通用 | `common` | 响应, 异常, 拦截器, 菜单 |
 | 配置 | `config` | 初始化数据, 分页, BCrypt |
-| 前端构建 | `web` -> `src/main/resources/static` | 构建产物随 jar 发布 |
+| 前端构建 | `web` -> `src/main/resources/static` | 构建产物随 jar 发布, 目录 git 忽略 |
 
 ## 3. 模块
 
@@ -160,9 +160,14 @@ sequenceDiagram
 
 ```text
 web/src/
-  main.jsx          React 入口, Ant Design locale
+  main.jsx          React 入口, Ant Design locale, theme
+  theme.js          设计 token
   api.js            axios 封装, 统一错误处理
-  App.jsx           登录态, 布局, 菜单, 强制改密
+  App.jsx           登录态, 菜单, 视图切换, 强制改密
+  layouts/
+    AppLayout.jsx   侧栏, 头部, 内容区, 页脚
+  components/
+    ErrorBoundary.jsx
   views/
     Login.jsx
     Dashboard.jsx
@@ -175,6 +180,27 @@ web/src/
 ```
 
 前端没有使用路由库, 通过 `view` 状态切换页面. 菜单由后端 `/api/auth/me` 返回.
+页面交互元素带 `data-testid`, 由 Playwright E2E 使用.
+
+## 8.1 可观测性
+
+```mermaid
+flowchart LR
+    APP[Spring Boot] --> ACT[Actuator /actuator/prometheus]
+    ACT --> PROM[Prometheus]
+    PROM --> GRAF[Grafana]
+    PROM --> ALERT[Alert rules]
+    ACT --> JVM[JVM / HTTP / Hikari metrics]
+    APP --> BIZ[BusinessMetrics]
+    BIZ --> ACT
+```
+
+- `BusinessMetrics` 记录登录, 改密, 考勤上传/确认/提醒, 通知, 消息.
+- `MetricsConfig` 注册用户, 部门, 批次, 未确认考勤, 未读消息 Gauge.
+- Actuator 自动提供 HTTP, JVM, 连接池指标.
+- `ops/monitoring` 提供 Prometheus, 告警规则, Grafana 数据源和 dashboard.
+
+详细指标和排障见 [MONITORING.md](MONITORING.md).
 
 ## 9. 部署
 

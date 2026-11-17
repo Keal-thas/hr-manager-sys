@@ -207,3 +207,42 @@ POST /api/admin/users/{id}/status
 ```json
 {"code":1,"message":"请先修改初始密码","data":null}
 ```
+
+## 8. 监控端点
+
+Actuator 端点不在 `/api` 下, 不经过登录拦截器:
+
+```text
+GET /actuator/health
+GET /actuator/info
+GET /actuator/metrics
+GET /actuator/metrics/{name}
+GET /actuator/prometheus
+```
+
+示例:
+
+```bash
+curl http://localhost:8080/actuator/health
+curl http://localhost:8080/actuator/prometheus
+```
+
+业务指标命名见 [MONITORING.md](MONITORING.md).
+
+生产环境建议只在内网暴露 Actuator, 或使用独立管理端口.
+
+## 9. 健康检查
+
+保留简单探活接口:
+
+```text
+GET /api/health
+```
+
+响应:
+
+```json
+{"code":0,"message":"ok","data":"UP"}
+```
+
+该接口公开, 不需要登录.

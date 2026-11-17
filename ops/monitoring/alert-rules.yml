@@ -1,0 +1,42 @@
+groups:
+  - name: hr-manager-sys
+    rules:
+      - alert: HighHttp5xxRate
+        expr: |
+          sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m]))
+          /
+          clamp_min(sum(rate(http_server_requests_seconds_count[5m])), 0.001)
+          > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: HTTP 5xx rate above 5%
+          description: "5xx ratio is {{ $value | humanizePercentage }} over the last 5 minutes."
+
+      - alert: LoginFailureSpike
+        expr: increase(hr_auth_login_total{result=~"bad_password|locked|unknown_user"}[10m]) > 20
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: Login failures spiking
+          description: "{{ $value }} failed login attempts in the last 10 minutes."
+
+      - alert: AttendanceUnconfirmedBacklog
+        expr: hr_attendance_unconfirmed > 100
+        for: 30m
+        labels:
+          severity: info
+        annotations:
+          summary: Attendance confirmation backlog
+          description: "{{ $value }} attendance records are still unconfirmed."
+
+      - alert: AppDown
+        expr: up{job="hr-manager-sys"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: hr-manager-sys is down
+          description: Prometheus cannot scrape /actuator/prometheus.

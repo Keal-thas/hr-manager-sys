@@ -40,7 +40,7 @@ export default function Profile() {
   };
 
   return (
-    <Row gutter={[16, 16]}>
+    <Row gutter={[16, 16]} data-testid="profile-page">
       <Col xs={24} lg={12}>
         <Card title="个人信息">
           <Descriptions column={1} size="small">
@@ -60,7 +60,7 @@ export default function Profile() {
             <Form.Item name="email" label="邮箱">
               <Input placeholder="请输入邮箱" />
             </Form.Item>
-            <Button type="primary" htmlType="submit">保存</Button>
+            <Button type="primary" htmlType="submit" data-testid="profile-save">保存</Button>
           </Form>
         </Card>
       </Col>

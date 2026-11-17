@@ -174,7 +174,7 @@ export default function AdminSystem({ tab }) {
   }));
 
   return (
-    <Card>
+    <Card data-testid="admin-system-page">
       <Tabs
         activeKey={activeTab}
         onChange={setActiveTab}

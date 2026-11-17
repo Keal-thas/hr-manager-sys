@@ -28,6 +28,34 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+  metrics:
+    tags:
+      application: hr-manager-sys
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5,0.95,0.99
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: hr-manager-sys
+    description: HR management system
+    version: 0.0.1
+
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true

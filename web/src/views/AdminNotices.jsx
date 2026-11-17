@@ -99,7 +99,7 @@ export default function AdminNotices({ tab }) {
   };
 
   return (
-    <Card>
+    <Card data-testid="admin-notices-page">
       <Tabs
         activeKey={activeTab}
         onChange={setActiveTab}
@@ -203,7 +203,7 @@ export default function AdminNotices({ tab }) {
           <Form.Item name="saveAsTemplate" label="同时存为模板" valuePropName="checked">
             <Checkbox>保存为模板</Checkbox>
           </Form.Item>
-          <Button type="primary" htmlType="submit" block>发布</Button>
+          <Button type="primary" htmlType="submit" block data-testid="notice-publish-submit">发布</Button>
         </Form>
       </Modal>
 

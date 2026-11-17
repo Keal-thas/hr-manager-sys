@@ -128,7 +128,7 @@ export default function MyAttendance() {
   }
 
   return (
-    <div>
+    <div data-testid="my-attendance-page">
       {current ? (
         <Card
           title={`${current.batchYear} 年 ${current.batchMonth} 月考勤`}
@@ -143,7 +143,7 @@ export default function MyAttendance() {
             <Alert type="success" showIcon message={`已确认，签名时间 ${current.signatureTime || ''}`} />
           ) : (
             <Space>
-              <Button type="primary" onClick={openSign}>阅读并签字确认</Button>
+              <Button type="primary" onClick={openSign} data-testid="attendance-sign-open">阅读并签字确认</Button>
               <span className="muted">确认前请核对考勤明细</span>
             </Space>
           )}
@@ -183,6 +183,7 @@ export default function MyAttendance() {
         confirmLoading={saving}
         okText="提交确认"
         width={680}
+        okButtonProps={{ 'data-testid': 'attendance-sign-submit' }}
       >
         <Alert
           type="info"
@@ -190,7 +191,7 @@ export default function MyAttendance() {
           style={{ marginBottom: 12 }}
           message="本人承诺已认真阅读本表中的内容，明白并认可其中的法律含义"
         />
-        <Checkbox checked={agreed} onChange={(e) => setAgreed(e.target.checked)}>
+        <Checkbox checked={agreed} onChange={(e) => setAgreed(e.target.checked)} data-testid="attendance-agree">
           我已阅读并同意考勤内容
         </Checkbox>
         <div style={{ marginTop: 12, marginBottom: 8 }}>请在下方签名：</div>
@@ -199,6 +200,7 @@ export default function MyAttendance() {
           width={620}
           height={180}
           className="signature-canvas"
+          data-testid="signature-canvas"
           onMouseDown={start}
           onMouseMove={move}
           onMouseUp={end}

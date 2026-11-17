@@ -12,6 +12,12 @@ spring:
     console:
       enabled: false
 
+management:
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
 logging:
   level:
     com.hrmanager: warn
