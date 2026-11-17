@@ -61,7 +61,8 @@ flowchart TB
 | dept | 部门树, 部门编码生成 |
 | role | 角色, 菜单权限 |
 | attendance | 批次, 明细, Excel, 异常, 签名, 提醒 |
-| notice | 通知, 模板, 消息 |
+| notice | 通知, 模板, 站内消息 |
+| integration | 企业微信 client, token 缓存, 异步推送, 发送日志 |
 | dashboard | 首页聚合统计 |
 | common | ApiResponse, 异常, 拦截器, 菜单 |
 | config | DataInitializer, MyBatis Plus, PasswordEncoder |
@@ -156,6 +157,32 @@ sequenceDiagram
     S-->>C: noticeId + targetCount
 ```
 
+## 7.1 企业微信推送流程
+
+```mermaid
+sequenceDiagram
+    participant B as 业务 Service
+    participant M as MessageService
+    participant N as WeComNotifier
+    participant C as WeComClient
+    participant W as 企业微信
+    B->>M: send(userId, type, title, content)
+    M->>M: insert sys_message
+    M->>N: send async (enabled)
+    N->>N: resolve wecom_user_id
+    N->>C: sendText
+    C->>W: gettoken (cached)
+    C->>W: message/send
+    W-->>C: errcode
+    C-->>N: success / WeComException
+    N->>N: insert wecom_message_log
+```
+
+- 站内消息成功即业务成功
+- 企业微信异步发送, 失败不回滚
+- token 失效只重试一次
+- 发送日志记录 SENT, FAILED, SKIPPED
+
 ## 8. 前端结构
 
 ```text
@@ -219,6 +246,7 @@ H2 file ./data/hr
 Nginx / 负载均衡
 Spring Boot jar
 MySQL 8
+Flyway 启动时执行 db/migration/mysql
 前端静态资源在 jar 内, 也可以由 Nginx 托管
 ```
 
@@ -228,12 +256,12 @@ MySQL 8
 - 关闭 Swagger UI 或限制内网访问
 - 使用 HTTPS
 - Session 使用 Redis 或粘性会话
-- 消息发送异步化
+- 站内消息批量插入, 企业微信批量发送或队列化
 - 文件签名使用对象存储
 
 ## 10. 非目标
 
-- 不接企业微信
+- 不做企业微信 SSO 和电子签名
 - 不做审批流
 - 不做 OCR
 - 不做复杂报表

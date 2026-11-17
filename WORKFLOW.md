@@ -121,17 +121,25 @@ test: add login test
 
 ## 6. 数据库变更
 
+数据库使用 Flyway 版本管理.
+
 任何表结构变更必须同步:
 
 ```text
-src/main/resources/schema.sql
-src/main/resources/schema-mysql.sql
+src/main/resources/db/migration/h2/V<version>__<name>.sql
+src/main/resources/db/migration/mysql/V<version>__<name>.sql
 entity / mapper
 DataInitializer
 tests
 ```
 
-H2 和 MySQL 必须保持一致. 开发环境 H2 使用 `MODE=MySQL`.
+规则:
+
+- H2 和 MySQL 使用相同版本号
+- 已应用的迁移不能修改, 只能新增版本
+- H2 和 MySQL 表名, 列名必须一致
+- `MigrationConsistencyTest` 会校验
+- `MySqlSchemaIntegrationTests` 会在 Docker 环境真实执行 MySQL 迁移
 
 同时更新:
 
@@ -179,7 +187,11 @@ H2 和 MySQL 必须保持一致. 开发环境 H2 使用 `MODE=MySQL`.
   NoticeMessageApiTests         通知发布, 消息已读, 模板生命周期
   AdminApiTests                 部门, 角色, 用户, 初始密码强制修改
   PasswordPolicyTest            密码规则
-  SchemaConsistencyTest         H2 与 MySQL schema 一致性
+  AuthorizationApiTests         admin 路径权限校验
+  MigrationConsistencyTest      H2/MySQL 迁移一致性
+  MySqlSchemaIntegrationTests   Testcontainers MySQL 8
+  WeComClientTest               token 缓存, 发送, 重试
+  WeComNotifierTest             SENT/FAILED/SKIPPED 日志
   ```
 - 当前前端测试:
   ```text

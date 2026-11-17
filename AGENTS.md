@@ -12,8 +12,9 @@ This file is mandatory for AI agents working in this repository.
 6. `docs/TESTING.md`
 7. `docs/FRONTEND.md`
 8. `docs/MONITORING.md`
-9. `docs/AGENT-WORKFLOW.md`
-10. `SESSION-NOTES.md`
+9. `docs/WECOM.md`
+10. `docs/AGENT-WORKFLOW.md`
+11. `SESSION-NOTES.md`
 
 ## Stack constraints
 
@@ -22,8 +23,9 @@ This file is mandatory for AI agents working in this repository.
 - React 18, Vite 5, Ant Design 5.
 - H2 for development, MySQL for production.
 - Keep API responses in the `ApiResponse` shape `{code, message, data}`.
-- Keep existing module boundaries: `auth`, `user`, `dept`, `role`, `attendance`, `notice`, `dashboard`, `common`, `config`.
-- Do not add WeCom or other external integrations unless explicitly requested.
+- Keep existing module boundaries: `auth`, `user`, `dept`, `role`, `attendance`, `notice`, `integration`, `dashboard`, `common`, `config`.
+- WeCom outbound app messages are supported through `integration/wecom`.
+- Do not add WeCom SSO, directory sync, or e-signature unless explicitly requested.
 
 ## Required workflow
 
@@ -70,15 +72,20 @@ This file is mandatory for AI agents working in this repository.
 
 ## Database changes
 
-When a table or column changes, update all of:
+Database changes use Flyway.
 
-- `src/main/resources/schema.sql`
-- `src/main/resources/schema-mysql.sql`
+When a table or column changes, add both migrations:
+
+- `src/main/resources/db/migration/h2/V<version>__<name>.sql`
+- `src/main/resources/db/migration/mysql/V<version>__<name>.sql`
+
+Then update:
+
 - entities and mappers
 - `DataInitializer` if seed data is affected
 - tests if behavior changes
 
-Keep H2 and MySQL schemas consistent.
+Keep H2 and MySQL migrations consistent. Never edit an applied migration.
 
 Always update:
 
@@ -106,7 +113,8 @@ Always update:
 - `mvn -B -ntp verify` must pass.
 - `cd web && npm test` must pass.
 - For login, attendance, notice, or layout changes, add or update `web/e2e/*.spec.js` and run `cd web && npm run e2e`.
-- Keep `schema.sql` and `schema-mysql.sql` in sync; `SchemaConsistencyTest` enforces it.
+- Keep H2 and MySQL migrations in sync; `MigrationConsistencyTest` enforces it.
+- `MySqlSchemaIntegrationTests` needs Docker and runs in CI.
 - Do not weaken or delete tests to make CI pass.
 
 ## DOCX conversion tooling

@@ -6,7 +6,7 @@ Mandatory rules:
 
 - JDK 8 only. No Java 9+ syntax or APIs.
 - Keep `ApiResponse` shape `{code, message, data}`.
-- Update both `schema.sql` and `schema-mysql.sql` for DB changes.
+- Use Flyway migrations for DB changes: add matching `db/migration/h2` and `db/migration/mysql` files. Never edit an applied migration.
 - Run `bash scripts/install-hooks.sh` once.
 - Run `bash scripts/check.sh` before push.
 - Do not commit `tmp.docx`, `data/`, `target/`, `web/node_modules/`, `src/main/resources/static/`, `__pycache__/`, secrets, or files over 10 MB.
@@ -15,5 +15,5 @@ Mandatory rules:
 - Run `bash scripts/agent-check.sh full` before delivery.
 - Monitoring is technical only. Do not inject metrics into business services. Update `docs/MONITORING.md` when technical metrics change.
 - Add `data-testid` to interactive elements used by E2E.
-- Do not add WeCom or external integrations unless requested.
+- WeCom outbound app messages are supported in `integration/wecom`. Do not add SSO, directory sync, or e-signature unless requested.
 - Never store the public archive password in the repository.

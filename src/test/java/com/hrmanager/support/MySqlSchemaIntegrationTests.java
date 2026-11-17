@@ -49,7 +49,13 @@ class MySqlSchemaIntegrationTests {
         Integer tables = jdbcTemplate.queryForObject(
                 "select count(*) from information_schema.tables where table_schema = database()",
                 Integer.class);
-        assertTrue(tables != null && tables >= 9, "expected at least 9 tables");
+        assertTrue(tables != null && tables >= 10, "expected at least 10 tables");
+
+        Integer wecomColumn = jdbcTemplate.queryForObject(
+                "select count(*) from information_schema.columns where table_schema = database() "
+                        + "and table_name = 'sys_user' and column_name = 'wecom_user_id'",
+                Integer.class);
+        assertTrue(wecomColumn != null && wecomColumn == 1, "expected sys_user.wecom_user_id");
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)

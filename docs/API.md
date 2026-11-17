@@ -194,6 +194,35 @@ POST /api/admin/users/{id}/reset-password
 POST /api/admin/users/{id}/status
 ```
 
+用户对象新增:
+
+```text
+wecomUserId  企业微信 UserID, 可空
+```
+
+留空时按 `app.wecom.use-employee-no-fallback` 决定是否使用工号.
+
+## 6.1 企业微信
+
+```text
+GET /api/admin/wecom/status
+GET /api/admin/wecom/logs?page=1&size=10
+```
+
+`status` 返回:
+
+```json
+{
+  "enabled": true,
+  "configured": true,
+  "ready": true,
+  "agentId": "1000002",
+  "useEmployeeNoFallback": true
+}
+```
+
+不返回 secret 和 corpId 明文. 权限为 `admin-notice`.
+
 ## 7. 错误示例
 
 ```json

@@ -229,7 +229,7 @@ CONFIRMED   已确认
 
 - 考勤提醒: 未确认员工
 - 异常提醒: 未阅读且有处罚记录的员工
-- 站内消息, 不接企业微信
+- 站内消息; 企业微信应用消息在第 10 节补充
 
 ### 3.5 通知与消息
 
@@ -331,7 +331,7 @@ MySQL:
 java -jar target/hr-manager-sys-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
 ```
 
-先执行 `src/main/resources/schema-mysql.sql`.
+Flyway 会在启动时自动执行 `db/migration/mysql`.
 
 前端开发:
 
@@ -350,7 +350,7 @@ npm run build
 
 ### 3.10 取舍
 
-- 不接企业微信, 所有提醒改站内消息
+- 原 MVP 只做站内消息, 第 10 节已补企业微信应用消息推送
 - 部门 5 级, 修正原需求里"6 级"和 10 位编码的矛盾
 - 考勤字段用 JSON 存储, 降低表结构复杂度
 - 签名 base64 存库, 生产建议对象存储
@@ -389,6 +389,8 @@ npm run build
 - 考勤异常清单上传
 - 5000 条导入和 5000 人消息性能
 - admin 新接口权限映射维护
+- 企业微信 SSO 和电子签名
+- 企业微信通讯录同步
 
 建议后续:
 
@@ -447,7 +449,7 @@ AttendanceApiTests       批次, 明细, 确认, 模板, 导出
 NoticeMessageApiTests    通知, 消息, 模板
 AdminApiTests            部门, 角色, 用户, 初始密码
 PasswordPolicyTest       密码规则
-SchemaConsistencyTest    H2/MySQL schema 对齐
+MigrationConsistencyTest H2/MySQL 迁移对齐
 MonitoringApiTests       Actuator health, metrics, prometheus
 AbstractApiTest          MockMvc 和登录辅助
 ```
@@ -464,7 +466,7 @@ web/src/api.test.js      Axios 响应拦截和错误提示
 
 - JaCoCo 生成覆盖率报告 `target/site/jacoco/index.html`
 - Maven Enforcer 校验 JDK 8 和 Maven 3.9+
-- `SchemaConsistencyTest` 阻止 H2/MySQL schema 漂移
+- `MigrationConsistencyTest` 阻止 H2/MySQL schema 漂移
 - `scripts/check.sh` 统一本地检查: 前端测试和构建, 确认构建产物未被跟踪, 后端 verify
 - `mvn package` 检查 `src/main/resources/static/index.html`, 防止打出没有页面的 jar
 - pre-push 执行前端测试和构建, 检查构建产物未被跟踪, 再执行后端 verify
@@ -774,7 +776,7 @@ pom.xml: testcontainers mysql + junit-jupiter
 行为:
 
 - Testcontainers 启动 MySQL 8.0.36
-- 执行 `schema-mysql.sql`
+- Flyway 执行 `db/migration/mysql`
 - 运行 `DataInitializer`
 - 管理员登录校验
 - 本机没有 Docker 时自动跳过, CI 会执行
@@ -835,3 +837,171 @@ CI 中 `MySqlSchemaIntegrationTests` 实际执行, 耗时约 23.7 秒, 没有跳
 - Prometheus 可查询 `http_server_requests_seconds_count`
 - Prometheus 中不存在 `hr_business_*`
 - CI 已实际执行 MySQL 集成测试, 没有跳过
+
+
+## 10. 企业微信与 Flyway
+
+### 10.1 企业微信范围
+
+只做企业微信应用消息推送:
+
+```text
+考勤通知
+考勤提醒
+考勤异常提醒
+通知发布
+```
+
+不做:
+
+```text
+企业微信 SSO
+通讯录同步
+电子签名
+审批流
+```
+
+站内消息保留, 企业微信是第二个通道.
+
+### 10.2 实现
+
+新增模块:
+
+```text
+com.hrmanager.integration.wecom
+  WeComProperties
+  WeComClient
+  WeComConfig
+  WeComNotifier
+  WeComMessageLog
+  WeComMessageLogMapper
+  WeComController
+```
+
+流程:
+
+```text
+MessageService.send
+  -> insert sys_message
+  -> WeComNotifier.send (异步)
+     -> 查 sys_user.wecom_user_id
+     -> WeComClient 获取/缓存 token
+     -> POST /cgi-bin/message/send
+     -> insert wecom_message_log
+```
+
+特性:
+
+- token 内存缓存, 提前 120 秒过期
+- token 失效 40014/42001/41001 自动重试一次
+- 异步线程池 core=2, max=4, queue=500
+- 未启用时不创建异步任务
+- 企业微信失败不影响站内消息
+- 日志状态 SENT / FAILED / SKIPPED
+
+### 10.3 用户映射
+
+`sys_user` 新增:
+
+```text
+wecom_user_id
+```
+
+解析顺序:
+
+```text
+wecom_user_id -> employee_no (可配置) -> SKIPPED
+```
+
+用户管理页面可以编辑. 留空时使用工号.
+
+### 10.4 配置
+
+```yaml
+app:
+  wecom:
+    enabled: ${WECOM_ENABLED:false}
+    corp-id: ${WECOM_CORP_ID:}
+    agent-id: ${WECOM_AGENT_ID:}
+    secret: ${WECOM_SECRET:}
+```
+
+默认关闭. 开启需要真实企业微信应用凭证.
+
+### 10.5 接口
+
+```text
+GET /api/admin/wecom/status
+GET /api/admin/wecom/logs?page=1&size=10
+```
+
+权限为 `admin-notice`.
+
+前端:
+
+- 通知发布页显示企业微信启用状态
+- 用户管理页编辑 WeCom UserID
+
+### 10.6 Flyway
+
+原来维护:
+
+```text
+schema.sql
+schema-mysql.sql
+```
+
+现在改为:
+
+```text
+src/main/resources/db/migration/h2/V1__init.sql
+src/main/resources/db/migration/h2/V2__wecom.sql
+src/main/resources/db/migration/mysql/V1__init.sql
+src/main/resources/db/migration/mysql/V2__wecom.sql
+```
+
+配置:
+
+```yaml
+spring:
+  flyway:
+    enabled: true
+    locations: classpath:db/migration/h2   # prod 用 mysql
+    baseline-on-migrate: true
+    baseline-version: 0
+```
+
+规则:
+
+- 已应用迁移不能修改
+- 新变更必须新增版本
+- H2 和 MySQL 版本一致
+- `MigrationConsistencyTest` 校验版本, 表, 列
+- `MySqlSchemaIntegrationTests` 真实执行 MySQL 迁移
+
+### 10.7 测试
+
+```text
+WeComClientTest               2 tests
+WeComNotifierTest             4 tests
+MigrationConsistencyTest      1 test
+MySqlSchemaIntegrationTests   1 test
+AuthorizationApiTests         3 tests, 含 WeCom 权限
+```
+
+本地验证:
+
+```text
+mvn -B -ntp verify        47 tests, 0 failures, 0 skipped
+cd web && npm run e2e     12 passed
+```
+
+MySQL 测试在本机 Docker 中实际执行, Flyway 成功应用 2 个迁移.
+
+### 10.8 已知限制
+
+- 企业微信真实发送需要真实 corpId, agentId, secret, 本地只用 MockRestServiceServer 测试
+- 没有通讯录同步, WeCom UserID 依赖人工维护
+- 大批量通知仍是逐用户异步任务, 生产建议批量接口或消息队列
+- 没有失败自动重试和补偿任务
+- 不做企业微信 SSO 和电子签名

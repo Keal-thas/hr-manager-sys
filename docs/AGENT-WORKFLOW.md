@@ -30,7 +30,7 @@ git log --oneline -5
 - 不主动提交, 除非用户明确要求
 - 先定位模块, 再读文件, 不要一上来全仓库搜索
 - 涉及前端先看 `web/src/views`, `web/src/layouts`, `web/src/api.js`
-- 涉及数据库先看两个 schema 和 `SchemaConsistencyTest`
+- 涉及数据库先看 `db/migration` 和 `MigrationConsistencyTest`
 
 ## 2. 任务分类
 
@@ -59,7 +59,7 @@ mvn -B -ntp test
 
 步骤:
 
-1. 同时修改 `schema.sql` 和 `schema-mysql.sql`
+1. 在 `db/migration/h2` 和 `db/migration/mysql` 新增同版本迁移
 2. 修改 entity / mapper
 3. 修改 `DataInitializer` (如果种子数据受影响)
 4. 补测试
@@ -69,13 +69,13 @@ mvn -B -ntp test
 验证:
 
 ```bash
-mvn -B -ntp -Dtest=SchemaConsistencyTest test
+mvn -B -ntp -Dtest=MigrationConsistencyTest test
 mvn -B -ntp -Dtest=MySqlSchemaIntegrationTests test
 mvn -B -ntp verify
 ```
 
 `MySqlSchemaIntegrationTests` 需要 Docker, 没有 Docker 时自动跳过.
-必须保持 H2 和 MySQL 表名, 列名, 顺序一致.
+必须保持 H2 和 MySQL 表名, 列名一致. 不修改已应用的迁移.
 
 ### 2.3 前端功能
 
@@ -133,6 +133,23 @@ npm run e2e
 ```bash
 mvn -B -ntp -Dtest=MonitoringApiTests test
 curl http://localhost:8080/actuator/prometheus
+```
+
+### 2.5.1 企业微信
+
+步骤:
+
+1. 只改 `integration/wecom`, 不在业务 service 里写 HTTP
+2. 新增推送场景使用 `WeComNotifier`, 不要绕开日志
+3. 用户映射优先 `wecom_user_id`, 回退工号
+4. secret 只从环境变量读取
+5. 补 `WeComClientTest` 或 `WeComNotifierTest`
+6. 更新 `docs/WECOM.md`
+
+验证:
+
+```bash
+mvn -B -ntp -Dtest=WeComClientTest,WeComNotifierTest test
 ```
 
 ### 2.6 发布/流程
@@ -207,7 +224,7 @@ bash scripts/agent-check.sh full       # standard + E2E
 - AntD 两个汉字的按钮可访问名会变成"保 存", E2E 用 `data-testid`
 - AntD Form 的 `getByLabel` 在 Modal 内要限定 modal 范围
 - 前端构建产物在 `src/main/resources/static`, 不要提交
-- H2 和 MySQL schema 必须同步
+- H2 和 MySQL Flyway 迁移必须同步, 不修改已应用迁移
 - JDK 8 不支持 `var`, records, text blocks, `List.of`
 - 新增 admin 接口时必须同步更新 `AuthInterceptor.requiredPermission`
 - 改动作业前先看 `git status`, 不要把用户未完成的改动一起格式化
@@ -219,7 +236,7 @@ bash scripts/agent-check.sh full       # standard + E2E
 ```text
 src/main/java/com/hrmanager   后端模块
 src/test/java                 后端测试
-src/main/resources            schema, 配置, 静态产物
+src/main/resources            Flyway 迁移, 配置, 静态产物
 web/src                       前端源码
 web/e2e                       Playwright 用例
 ops/monitoring                Prometheus, Grafana

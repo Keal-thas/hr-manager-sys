@@ -4,7 +4,7 @@
 
 一个简化的 HR 管理系统, 覆盖考勤确认, 消息通知, 部门/角色/用户管理和权限菜单.
 
-需求来源是一份较粗的需求文档, 本项目按"能开发, 能演示, 保持简单"的原则做了取舍, 没有实现企业微信等外部集成.
+需求来源是一份较粗的需求文档, 本项目按"能开发, 能演示, 保持简单"的原则做了取舍. 已接入企业微信应用消息推送, 不做企业微信 SSO 和电子签名.
 
 ## 技术栈
 
@@ -16,6 +16,8 @@
 - Vitest (前端单元测试)
 - Playwright (浏览器 E2E)
 - Testcontainers (MySQL 集成测试)
+- Flyway (数据库版本管理)
+- 企业微信应用消息 (可选, 默认关闭)
 - Spring Boot Actuator + Micrometer + Prometheus
 - Prometheus + Grafana (可选监控栈)
 - Apache POI (Excel 导入导出)
@@ -30,6 +32,7 @@
 - 考勤管理: 月度考勤 Excel 上传 (新增/覆盖/增量), 明细查看, 提醒, 异常清单上传, 导出
 - 通知管理: 全员/部门/指定员工发布, 通知模板
 - 系统管理: 部门树, 角色权限, 用户管理, 重置密码, 启停用
+- 企业微信: 站内消息同步落库, 应用消息异步推送, 发送日志, 用户 UserID 映射
 - 可观测性: 健康检查, HTTP/JVM/连接池技术指标, Prometheus 抓取, Grafana 面板
 - 质量保障: 后端集成测试, 前端单元测试, Playwright E2E, CI 三档校验
 
@@ -151,20 +154,23 @@ CI 使用 Playwright Chromium.
 ## MySQL 部署
 
 1. 创建数据库 `hr_manager`
-2. 执行 `src/main/resources/schema-mysql.sql`
-3. 修改 `src/main/resources/application-prod.yml` 的连接信息
-4. 构建前端并打包:
+2. 修改 `src/main/resources/application-prod.yml` 的连接信息
+3. 构建前端并打包:
 
 ```bash
 cd web && npm ci && npm run build && cd ..
 mvn -DskipTests package
 ```
 
-5. 启动:
+4. 启动:
 
 ```bash
 java -jar target/hr-manager-sys-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
 ```
+
+Flyway 会在启动时自动执行 `db/migration/mysql` 下的迁移, 不再手工执行 schema 文件.
+
+企业微信推送通过 `WECOM_*` 环境变量配置, 默认关闭. 详见 [docs/WECOM.md](docs/WECOM.md).
 
 `prod` profile 默认关闭演示数据:
 
@@ -227,11 +233,14 @@ POST /api/admin/users
 PUT  /api/admin/users/{id}
 POST /api/admin/users/{id}/reset-password
 POST /api/admin/users/{id}/status
+
+GET  /api/admin/wecom/status
+GET  /api/admin/wecom/logs?page=1&size=10
 ```
 
 ## 设计取舍
 
-- 企业微信不做. 所有提醒都是站内消息.
+- 企业微信做应用消息推送. 站内消息和 WeCom 同时发送, 不做 SSO 和电子签名.
 - 部门最多 5 级. 原因是部门编码 10 位, 每级 2 位; 原需求里"6 级"和 10 位编码矛盾, 这里按 5 级实现.
 - 考勤数据用 `data_json` 保存完整字段, 关键字段单独建列用于查询和状态流转.
 - 签名图片以 base64 存库, 方便演示; 生产建议换对象存储.
@@ -249,12 +258,13 @@ src/main/java/com/hrmanager
   role        角色
   attendance  考勤批次, 明细, Excel, 异常
   notice      通知, 模板, 站内消息
+  integration 企业微信客户端, 异步推送, 发送日志
   dashboard   首页统计
   common      响应, 异常, 拦截器, 菜单
   config      初始化数据, MyBatis Plus, 密码
 src/main/resources
-  schema.sql          H2
-  schema-mysql.sql    MySQL
+  db/migration/h2     Flyway H2 迁移
+  db/migration/mysql  Flyway MySQL 迁移
   static/             React 构建产物, git 忽略
 src/test/java        后端集成测试和单元测试
 web/                  React 源码
@@ -272,6 +282,7 @@ ops/monitoring/       Prometheus, Grafana, 告警规则
 - [docs/TESTING.md](docs/TESTING.md): 测试策略和冒烟清单
 - [docs/FRONTEND.md](docs/FRONTEND.md): 前端结构, 设计系统, E2E 选择器
 - [docs/MONITORING.md](docs/MONITORING.md): 指标, Prometheus, Grafana, 告警
+- [docs/WECOM.md](docs/WECOM.md): 企业微信集成配置, 用户映射, 失败处理
 - [docs/AGENT-WORKFLOW.md](docs/AGENT-WORKFLOW.md): AI agent 任务工作流
 - [docs/SECURITY.md](docs/SECURITY.md): 认证, 密码, 上传, 密钥
 - [docs/DECISIONS.md](docs/DECISIONS.md): 关键决策记录
@@ -347,9 +358,9 @@ bash scripts/agent-check.sh standard
 bash scripts/agent-check.sh full
 ```
 
-集成测试默认使用 H2 内存库. `SchemaConsistencyTest` 会校验 `schema.sql` 和 `schema-mysql.sql` 的表和列保持一致.
+集成测试默认使用 H2 内存库, Flyway 自动执行 `db/migration/h2`. `MigrationConsistencyTest` 会校验 H2 和 MySQL 迁移版本, 表和列保持一致.
 
-`MySqlSchemaIntegrationTests` 使用 Testcontainers 启动 MySQL 8, 真实执行 `schema-mysql.sql` 并验证种子数据和登录. 本机没有 Docker 时该用例自动跳过, CI 会执行.
+`MySqlSchemaIntegrationTests` 使用 Testcontainers 启动 MySQL 8, 真实执行 Flyway `db/migration/mysql` 并验证种子数据和登录. 本机没有 Docker 时该用例自动跳过, CI 会执行.
 
 ## 公有 Release
 

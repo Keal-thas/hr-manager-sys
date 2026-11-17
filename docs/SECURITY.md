@@ -41,6 +41,7 @@
 /api/admin/roles        admin-role
 /api/admin/menus        admin-role
 /api/admin/users        admin-user
+/api/admin/wecom        admin-notice
 ```
 
 - 未映射的 `/api/admin/**` 默认拒绝
@@ -93,6 +94,16 @@
 
 公有 Release 仓库只放密码保护的压缩包. 密码不写入仓库.
 
+## 8.1 企业微信
+
+- `WECOM_SECRET` 只放在环境变量或密钥管理系统
+- 不把 corpId, agentId, secret 写入仓库
+- 企业微信接口使用 HTTPS
+- 应用消息内容只包含必要信息, 不发送身份证, 银行卡等敏感字段
+- 发送日志保存内容快照, 生产需要评估保留期限和访问权限
+- token 只在内存缓存, 不落库
+- 企业微信失败不影响站内消息
+
 ## 9.1 Actuator 暴露面
 
 `/actuator/health`, `/actuator/metrics`, `/actuator/prometheus` 默认不经过 `/api/**` 登录拦截器.
@@ -123,6 +134,9 @@
 - 配置备份
 - 配置限流和上传大小
 - 消息发送异步化
+- 企业微信 secret 使用环境变量
+- 生产关闭种子数据
+- 数据库变更走 Flyway, 不在生产手工改表
 - 签名图片使用对象存储
 
 ## 11. 已知风险
@@ -132,4 +146,5 @@
 - 生产环境必须关闭 `app.seed.enabled`, 避免写入演示账号
 - 签名 base64 存在数据库, 数据量大
 - 提醒同步插入, 5000 人时会慢
-- 没有审计日志
+- 没有独立审计日志, 企业微信发送日志只覆盖推送结果
+- 企业微信 UserID 依赖人工维护, 没有通讯录同步

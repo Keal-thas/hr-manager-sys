@@ -131,6 +131,7 @@ export default function AdminSystem({ tab }) {
         roleId: record.roleId,
         phone: record.phone,
         email: record.email,
+        wecomUserId: record.wecomUserId,
         status: record.status
       });
     } else {
@@ -285,6 +286,7 @@ export default function AdminSystem({ tab }) {
                     { title: '部门', dataIndex: 'departmentName', width: 160 },
                     { title: '角色', dataIndex: 'roleName', width: 130 },
                     { title: '手机号', dataIndex: 'phone', width: 140 },
+                    { title: '企业微信', dataIndex: 'wecomUserId', width: 150, render: (v) => v || <span className="muted">跟随工号</span> },
                     { title: '状态', dataIndex: 'status', width: 100, render: (v) => <Tag color={v === 'ACTIVE' ? 'green' : 'red'}>{v}</Tag> },
                     {
                       title: '操作',
@@ -365,6 +367,9 @@ export default function AdminSystem({ tab }) {
           </Form.Item>
           <Form.Item name="email" label="邮箱">
             <Input />
+          </Form.Item>
+          <Form.Item name="wecomUserId" label="企业微信 UserID" extra="留空时使用工号作为 WeCom UserID">
+            <Input placeholder="例如 ZhangSan" />
           </Form.Item>
           {editingUser ? (
             <Form.Item name="status" label="状态">

@@ -5,7 +5,7 @@
 ```text
 单元测试      密码规则, 前端响应拦截
 接口测试      @SpringBootTest + MockMvc, 覆盖主要 API
-一致性测试    H2 schema 和 MySQL schema 对比
+一致性测试    H2 和 MySQL 迁移版本, 表, 列对比
 浏览器 E2E    Playwright 覆盖登录, 员工考勤, 管理员主流程
 监控测试      Actuator health, metrics, prometheus
 手工冒烟      发布前浏览器和接口检查
@@ -18,7 +18,7 @@ src/test/resources/application-test.yml
 jdbc:h2:mem:hr_test
 ```
 
-测试会自动执行 `schema.sql` 和 `DataInitializer`, 不依赖外部数据库.
+测试会自动执行 Flyway H2 迁移和 `DataInitializer`, 不依赖外部数据库.
 会修改数据的测试类使用 `@Transactional`, 每个用例结束后回滚.
 
 ## 2. 后端自动化测试
@@ -66,8 +66,10 @@ src/test/java/com/hrmanager/admin/AdminApiTests.java
   同级同名部门拒绝
   重复角色编码拒绝
 
-src/test/java/com/hrmanager/support/SchemaConsistencyTest.java
-  schema.sql 和 schema-mysql.sql 的表名和列名必须一致
+src/test/java/com/hrmanager/support/MigrationConsistencyTest.java
+  H2 和 MySQL 迁移版本一致
+  表名和列名一致
+  wecom_user_id 和 wecom_message_log 存在
 
 src/test/java/com/hrmanager/support/MonitoringApiTests.java
   /actuator/health 为 UP
@@ -76,10 +78,20 @@ src/test/java/com/hrmanager/support/MonitoringApiTests.java
 
 src/test/java/com/hrmanager/support/MySqlSchemaIntegrationTests.java
   Testcontainers 启动 MySQL 8
-  执行 schema-mysql.sql
+  Flyway 执行 db/migration/mysql
   DataInitializer 在 MySQL 下写入种子数据
   管理员登录成功
+  校验 wecom_user_id 列
   本机没有 Docker 时自动跳过, CI 会执行
+
+src/test/java/com/hrmanager/integration/wecom/WeComClientTest.java
+  token 获取和缓存
+  发送文本
+  token 失效重试一次
+
+src/test/java/com/hrmanager/integration/wecom/WeComNotifierTest.java
+  SENT / FAILED / SKIPPED 日志
+  未启用不产生任务
 ```
 
 ## 3. 前端自动化测试
@@ -200,7 +212,7 @@ target/site/jacoco/index.html
 - 不要依赖测试执行顺序.
 - 不要依赖生产 `data/` 目录.
 - 不要在测试里使用真实密码或密钥.
-- 新增表或列时同时更新两个 schema, `SchemaConsistencyTest` 会失败提醒.
+- 新增表或列时同时新增 H2 和 MySQL 迁移, `MigrationConsistencyTest` 会失败提醒.
 
 ## 6. 常用测试类型
 

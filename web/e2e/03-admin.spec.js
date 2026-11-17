@@ -19,6 +19,7 @@ test.describe('管理员流程', () => {
     await login(page, '10001', 'Admin1234');
     await openMenu(page, 'admin-notice');
 
+    await expect(page.getByTestId('wecom-status')).toBeVisible();
     await page.getByRole('button', { name: '发布通知' }).click();
     const modal = page.locator('.ant-modal').filter({ hasText: '发布通知' });
     await expect(modal).toBeVisible();

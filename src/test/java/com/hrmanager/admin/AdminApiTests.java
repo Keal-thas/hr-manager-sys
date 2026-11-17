@@ -57,13 +57,15 @@ class AdminApiTests extends AbstractApiTest {
                 .last("limit 1"));
 
         String createBody = "{\"employeeNo\":\"20001\",\"name\":\"测试员工\",\"departmentId\":"
-                + adminUser.getDepartmentId() + ",\"roleId\":" + employeeRole.getId() + "}";
+                + adminUser.getDepartmentId() + ",\"roleId\":" + employeeRole.getId()
+                + ",\"wecomUserId\":\"TestUser20001\"}";
         mockMvc.perform(post("/api/admin/users")
                         .session(admin)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(createBody))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.mustChangePassword").value(true));
+                .andExpect(jsonPath("$.data.mustChangePassword").value(true))
+                .andExpect(jsonPath("$.data.wecomUserId").value("TestUser20001"));
 
         MockHttpSession newUser = login("20001", "Init1234");
 

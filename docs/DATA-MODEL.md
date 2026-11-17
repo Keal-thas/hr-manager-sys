@@ -11,6 +11,7 @@ erDiagram
     SYS_ROLE ||--o{ SYS_USER : "role_id"
     SYS_USER ||--o{ ATTENDANCE_RECORD : "user_id"
     SYS_USER ||--o{ SYS_MESSAGE : "user_id"
+    SYS_USER ||--o{ WECOM_MESSAGE_LOG : "user_id"
     SYS_USER ||--o{ MESSAGE_NOTICE : "publisher_id"
     ATTENDANCE_BATCH ||--o{ ATTENDANCE_RECORD : "batch_id"
     ATTENDANCE_BATCH ||--o{ ATTENDANCE_PENALTY : "batch_id"
@@ -35,6 +36,7 @@ erDiagram
 | `message_notice` | 管理员发布的通知 |
 | `notice_template` | 通知模板 |
 | `sys_message` | 员工站内消息 |
+| `wecom_message_log` | 企业微信发送日志 |
 
 ## 3. sys_department
 
@@ -95,6 +97,7 @@ admin-user
 | name | VARCHAR(100) | 否 | | 姓名 |
 | phone | VARCHAR(32) | 是 | | 手机号 |
 | email | VARCHAR(128) | 是 | | 邮箱 |
+| wecom_user_id | VARCHAR(64) | 是 | | 企业微信 UserID, 留空时回退工号 |
 | department_id | BIGINT | 是 | IDX | 所属部门 |
 | role_id | BIGINT | 是 | IDX | 所属角色 |
 | status | VARCHAR(20) | 否 | | ACTIVE / DISABLED |
@@ -237,6 +240,28 @@ ATTENDANCE_ABNORMAL 考勤异常提醒
 NOTICE              系统通知
 ```
 
+## 11.1 wecom_message_log
+
+| 字段 | 类型 | 允许空 | 键 | 说明 |
+|---|---|---|---|---|
+| id | BIGINT | 否 | PK | |
+| user_id | BIGINT | 是 | IDX | 用户 id |
+| employee_no | VARCHAR(32) | 是 | | 工号快照 |
+| wecom_user_id | VARCHAR(64) | 是 | | 企业微信 UserID 快照 |
+| scene | VARCHAR(32) | 是 | | 消息场景 |
+| title | VARCHAR(200) | 是 | | 标题 |
+| content | TEXT | 是 | | 内容快照 |
+| status | VARCHAR(20) | 否 | | SENT / FAILED / SKIPPED |
+| errcode | INT | 是 | | 企业微信错误码 |
+| errmsg | VARCHAR(500) | 是 | | 错误信息 |
+| created_at | TIMESTAMP | 是 | IDX | |
+
+说明:
+
+- 企业微信异步发送, 失败不影响站内消息
+- 未启用企业微信时不写日志
+- 用户没有 WeCom UserID 时写 SKIPPED
+
 ## 12. 状态枚举
 
 | 枚举 | 值 |
@@ -272,17 +297,28 @@ NOTICE              系统通知
 - 1 条欢迎通知
 - 1 个通知模板
 
-初始数据只在 `sys_user` 为空时写入.
+初始数据只在 `app.seed.enabled=true` 且 `sys_user` 为空时写入.
+生产 profile 默认关闭.
 
 ## 15. 变更检查清单
 
+数据库使用 Flyway 版本管理, H2 和 MySQL 各维护一套迁移:
+
+```text
+src/main/resources/db/migration/h2/V<version>__<name>.sql
+src/main/resources/db/migration/mysql/V<version>__<name>.sql
+```
+
 修改数据模型时必须:
 
-1. 修改 `src/main/resources/schema.sql`
-2. 修改 `src/main/resources/schema-mysql.sql`
-3. 修改 entity
-4. 修改 mapper / service
-5. 修改 `DataInitializer`
-6. 更新本文件
-7. 更新 `SESSION-NOTES.md` 中的表说明
-8. 增加或更新测试
+1. 新增同版本 H2 和 MySQL 迁移文件
+2. 修改 entity
+3. 修改 mapper / service
+4. 修改 `DataInitializer`
+5. 更新本文件
+6. 更新 `SESSION-NOTES.md` 中的表说明
+7. 增加或更新测试
+8. 确认 `MigrationConsistencyTest` 通过
+9. 确认 `MySqlSchemaIntegrationTests` 通过
+
+不要修改已应用的迁移文件. 需要变更时新增下一个版本.

@@ -26,6 +26,7 @@ public class SysUser {
     private String name;
     private String phone;
     private String email;
+    private String wecomUserId;
     private Long departmentId;
     private Long roleId;
     private String status;

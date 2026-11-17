@@ -29,6 +29,9 @@ class AuthorizationApiTests extends AbstractApiTest {
 
         mockMvc.perform(get("/api/admin/attendance/batches").session(employee))
                 .andExpect(status().isForbidden());
+
+        mockMvc.perform(get("/api/admin/wecom/status").session(employee))
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -50,6 +53,9 @@ class AuthorizationApiTests extends AbstractApiTest {
 
         mockMvc.perform(get("/api/admin/menus").session(hr))
                 .andExpect(status().isForbidden());
+
+        mockMvc.perform(get("/api/admin/wecom/status").session(hr))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -65,5 +71,14 @@ class AuthorizationApiTests extends AbstractApiTest {
         mockMvc.perform(get("/api/admin/users").session(admin))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message", containsString("ok")));
+
+        mockMvc.perform(get("/api/admin/wecom/status").session(admin))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.enabled").value(false))
+                .andExpect(jsonPath("$.data.ready").value(false));
+
+        mockMvc.perform(get("/api/admin/wecom/logs").session(admin))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.records").isArray());
     }
 }

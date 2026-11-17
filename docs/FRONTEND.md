@@ -103,6 +103,8 @@ App
   - 其他错误显示服务端消息
 - `ErrorBoundary` 捕获页面渲染异常, 提供刷新按钮.
 - 页面切换时同步 `document.title`.
+- 通知发布页读取 `/api/admin/wecom/status`, 显示企业微信是否启用.
+- 用户管理页可以编辑企业微信 UserID.
 
 ## 6. 测试选择器约定
 
@@ -129,6 +131,7 @@ attendance-records-open
 admin-notices-page
 notice-publish-submit
 admin-system-page
+wecom-status
 ```
 
 新增交互元素时优先补 `data-testid`, 再写 E2E.

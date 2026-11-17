@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Button, Card, Checkbox, Form, Input, Modal, Select, Space, Table, Tabs, Tag, message
+  Alert, Button, Card, Checkbox, Form, Input, Modal, Select, Space, Table, Tabs, Tag, message
 } from 'antd';
 import api from '../api';
 
@@ -13,6 +13,7 @@ export default function AdminNotices({ tab }) {
   const [templates, setTemplates] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [users, setUsers] = useState([]);
+  const [wecom, setWecom] = useState(null);
   const [publishOpen, setPublishOpen] = useState(false);
   const [templateOpen, setTemplateOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState(null);
@@ -47,6 +48,7 @@ export default function AdminNotices({ tab }) {
     loadNotices(1, noticeSize);
     loadTemplates();
     loadOptions();
+    api.get('/admin/wecom/status').then(setWecom).catch(() => {});
   }, []);
 
   const publish = async (values) => {
@@ -100,6 +102,19 @@ export default function AdminNotices({ tab }) {
 
   return (
     <Card data-testid="admin-notices-page">
+      {wecom ? (
+        <Alert
+          data-testid="wecom-status"
+          style={{ marginBottom: 12 }}
+          type={wecom.ready ? 'success' : wecom.enabled ? 'warning' : 'info'}
+          showIcon
+          message={wecom.ready
+            ? `企业微信推送已启用, AgentID ${wecom.agentId}`
+            : wecom.enabled
+              ? '企业微信已开启但配置不完整'
+              : '企业微信推送未启用, 当前仅发送站内消息'}
+        />
+      ) : null}
       <Tabs
         activeKey={activeTab}
         onChange={setActiveTab}

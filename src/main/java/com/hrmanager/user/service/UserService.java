@@ -92,6 +92,7 @@ public class UserService {
         item.put("name", user.getName());
         item.put("phone", user.getPhone());
         item.put("email", user.getEmail());
+        item.put("wecomUserId", user.getWecomUserId());
         item.put("departmentId", user.getDepartmentId());
         item.put("departmentName", deptNames.get(user.getDepartmentId()));
         item.put("roleId", user.getRoleId());
@@ -168,6 +169,7 @@ public class UserService {
         }
         user.setPhone(body.getPhone());
         user.setEmail(body.getEmail());
+        user.setWecomUserId(body.getWecomUserId());
         if (StringUtils.hasText(body.getStatus())) {
             user.setStatus(body.getStatus());
         }

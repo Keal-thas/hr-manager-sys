@@ -33,7 +33,9 @@ Entity      Xxx
 - 主键 `id BIGINT AUTO_INCREMENT`.
 - 时间字段 `created_at`, `updated_at`.
 - 逻辑删除用 `status`.
-- 变更必须同步 H2 和 MySQL schema.
+- 变更必须使用 Flyway 迁移.
+- H2 和 MySQL 各新增同版本迁移文件.
+- 不修改已应用的迁移.
 - 必须更新 `docs/DATA-MODEL.md`.
 
 ## 4. 前端
@@ -82,7 +84,16 @@ Entity      Xxx
 - 业务健康如需监控, 先设计独立只读 exporter.
 - 技术指标或告警变更同步更新 `docs/MONITORING.md`.
 
-## 8. DOCX 工具
+## 8. 企业微信
+
+- 只在 `integration/wecom` 中调用企业微信接口.
+- 不在业务 service 中直接写 HTTP.
+- token 只在内存缓存.
+- secret 只能用环境变量或密钥管理.
+- 企业微信失败不能回滚站内消息.
+- 新增推送场景必须写 `wecom_message_log`.
+
+## 9. DOCX 工具
 
 - 位置 `.local/export-pandoc/`.
 - 修改转换规则时更新 `conversion-guide.md`.

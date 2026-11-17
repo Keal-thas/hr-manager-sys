@@ -60,6 +60,9 @@ public class AuthInterceptor implements HandlerInterceptor {
         if (path.startsWith("/api/admin/departments")) {
             return "admin-dept";
         }
+        if (path.startsWith("/api/admin/wecom")) {
+            return "admin-notice";
+        }
         if (path.startsWith("/api/admin/roles") || path.equals("/api/admin/menus")) {
             return "admin-role";
         }

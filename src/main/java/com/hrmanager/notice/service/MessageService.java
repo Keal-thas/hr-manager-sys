@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hrmanager.common.BusinessException;
 import com.hrmanager.common.PageResult;
+import com.hrmanager.integration.wecom.WeComNotifier;
 import com.hrmanager.notice.entity.SysMessage;
 import com.hrmanager.notice.mapper.SysMessageMapper;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import java.util.List;
 public class MessageService {
 
     private final SysMessageMapper messageMapper;
+    private final WeComNotifier weComNotifier;
 
     @Transactional
     public void send(Long userId, String type, String title, String content, Long bizId) {
@@ -35,6 +37,9 @@ public class MessageService {
         message.setReadFlag(false);
         message.setCreatedAt(LocalDateTime.now());
         messageMapper.insert(message);
+        if (weComNotifier.isEnabled()) {
+            weComNotifier.send(userId, type, title, content);
+        }
     }
 
     public void sendBatch(List<Long> userIds, String type, String title, String content, Long bizId) {

@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS sys_user (
     department_id BIGINT,
     role_id BIGINT,
     status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
-    must_change_password TINYINT(1) DEFAULT 0,
+    must_change_password BOOLEAN DEFAULT FALSE,
     failed_attempts INT DEFAULT 0,
     locked_until DATETIME,
     created_at DATETIME,
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS attendance_batch (
     created_by BIGINT,
     created_at DATETIME,
     published_at DATETIME,
-    latest TINYINT(1) DEFAULT 0,
+    latest BOOLEAN DEFAULT FALSE,
     KEY idx_batch_ym (batch_year, batch_month)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS attendance_record (
     status VARCHAR(20) NOT NULL DEFAULT 'UNREAD',
     signature_image LONGTEXT,
     signature_time DATETIME,
-    agree TINYINT(1) DEFAULT 0,
+    agree BOOLEAN DEFAULT FALSE,
     data_json LONGTEXT,
     created_at DATETIME,
     updated_at DATETIME,
@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS sys_message (
     title VARCHAR(200),
     content TEXT,
     biz_id BIGINT,
-    read_flag TINYINT(1) DEFAULT 0,
+    read_flag BOOLEAN DEFAULT FALSE,
     created_at DATETIME,
     KEY idx_message_user (user_id, read_flag)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
