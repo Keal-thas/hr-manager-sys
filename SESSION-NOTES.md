@@ -992,7 +992,7 @@ AuthorizationApiTests         3 tests, 含 WeCom 权限
 本地验证:
 
 ```text
-mvn -B -ntp verify        47 tests, 0 failures, 0 skipped
+mvn -B -ntp verify        46 tests, 0 failures, 0 skipped
 cd web && npm run e2e     12 passed
 ```
 
