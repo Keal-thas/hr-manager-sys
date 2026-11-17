@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hrmanager.common.BusinessException;
-import com.hrmanager.common.BusinessMetrics;
 import com.hrmanager.common.PageResult;
 import com.hrmanager.notice.entity.SysMessage;
 import com.hrmanager.notice.mapper.SysMessageMapper;
@@ -21,7 +20,6 @@ import java.util.List;
 public class MessageService {
 
     private final SysMessageMapper messageMapper;
-    private final BusinessMetrics metrics;
 
     @Transactional
     public void send(Long userId, String type, String title, String content, Long bizId) {
@@ -37,7 +35,6 @@ public class MessageService {
         message.setReadFlag(false);
         message.setCreatedAt(LocalDateTime.now());
         messageMapper.insert(message);
-        metrics.messageSent(type);
     }
 
     public void sendBatch(List<Long> userIds, String type, String title, String content, Long bizId) {

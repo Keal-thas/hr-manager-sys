@@ -83,15 +83,29 @@
     {
       "id": 3,
       "type": "stat",
-      "title": "Active users",
+      "title": "Process CPU",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "h": 6, "w": 6, "x": 12, "y": 0 },
-      "targets": [{ "refId": "A", "expr": "hr_users_active", "legendFormat": "active users" }],
-      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0 }, "overrides": [] },
+      "targets": [{ "refId": "A", "expr": "process_cpu_usage", "legendFormat": "cpu" }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 0.7 },
+              { "color": "red", "value": 0.85 }
+            ]
+          }
+        },
+        "overrides": []
+      },
       "options": {
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
         "colorMode": "value",
-        "graphMode": "none",
+        "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
         "textMode": "auto"
@@ -100,25 +114,11 @@
     {
       "id": 4,
       "type": "stat",
-      "title": "Unconfirmed attendance",
+      "title": "Hikari pending",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "h": 6, "w": 6, "x": 18, "y": 0 },
-      "targets": [{ "refId": "A", "expr": "hr_attendance_unconfirmed", "legendFormat": "unconfirmed" }],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "decimals": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              { "color": "green", "value": null },
-              { "color": "orange", "value": 50 },
-              { "color": "red", "value": 100 }
-            ]
-          }
-        },
-        "overrides": []
-      },
+      "targets": [{ "refId": "A", "expr": "hikaricp_connections_pending", "legendFormat": "pending" }],
+      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0 }, "overrides": [] },
       "options": {
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
         "colorMode": "value",
@@ -150,18 +150,18 @@
     {
       "id": 6,
       "type": "timeseries",
-      "title": "Login by result",
+      "title": "HTTP status rate",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
       "targets": [
         {
           "refId": "A",
-          "expr": "sum by (result) (increase(hr_auth_login_total[5m]))",
-          "legendFormat": "{{result}}"
+          "expr": "sum by (status) (rate(http_server_requests_seconds_count[5m]))",
+          "legendFormat": "{{status}}"
         }
       ],
       "fieldConfig": {
-        "defaults": { "unit": "short", "custom": { "drawStyle": "bars", "lineWidth": 1, "fillOpacity": 40, "stacking": { "mode": "normal", "group": "A" } } },
+        "defaults": { "unit": "reqps", "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 12 } },
         "overrides": []
       },
       "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } }
@@ -169,61 +169,54 @@
     {
       "id": 7,
       "type": "timeseries",
-      "title": "Attendance and notices",
+      "title": "JVM heap used",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 14 },
+      "targets": [{ "refId": "A", "expr": "sum(jvm_memory_used_bytes{area=\"heap\"})", "legendFormat": "heap" }],
+      "fieldConfig": {
+        "defaults": { "unit": "bytes", "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 16 } },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": false }, "tooltip": { "mode": "single", "sort": "none" } }
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "JVM threads",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 14 },
+      "targets": [{ "refId": "A", "expr": "jvm_threads_live_threads", "legendFormat": "threads" }],
+      "fieldConfig": {
+        "defaults": { "unit": "short", "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 16 } },
+        "overrides": []
+      },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": false }, "tooltip": { "mode": "single", "sort": "none" } }
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Hikari connections",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "gridPos": { "h": 7, "w": 24, "x": 0, "y": 22 },
       "targets": [
-        { "refId": "A", "expr": "sum(increase(hr_attendance_confirm_total[1h]))", "legendFormat": "attendance confirm" },
-        { "refId": "B", "expr": "sum(increase(hr_attendance_upload_total[1h]))", "legendFormat": "attendance upload" },
-        { "refId": "C", "expr": "sum(increase(hr_notice_recipients_total[1h]))", "legendFormat": "notice recipients" },
-        { "refId": "D", "expr": "sum(increase(hr_message_send_total[1h]))", "legendFormat": "messages sent" }
+        { "refId": "A", "expr": "hikaricp_connections_active", "legendFormat": "active" },
+        { "refId": "B", "expr": "hikaricp_connections_idle", "legendFormat": "idle" },
+        { "refId": "C", "expr": "hikaricp_connections_pending", "legendFormat": "pending" },
+        { "refId": "D", "expr": "hikaricp_connections_max", "legendFormat": "max" }
       ],
       "fieldConfig": {
         "defaults": { "unit": "short", "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 10 } },
         "overrides": []
       },
       "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } }
-    },
-    {
-      "id": 8,
-      "type": "timeseries",
-      "title": "JVM heap used",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 14 },
-      "targets": [{ "refId": "A", "expr": "sum(jvm_memory_used_bytes{area=\"heap\"})", "legendFormat": "heap" }],
-      "fieldConfig": {
-        "defaults": { "unit": "bytes", "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 16 } },
-        "overrides": []
-      },
-      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "single", "sort": "none" } }
-    },
-    {
-      "id": 9,
-      "type": "timeseries",
-      "title": "Unread messages",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 7, "w": 12, "x": 0, "y": 22 },
-      "targets": [{ "refId": "A", "expr": "hr_messages_unread", "legendFormat": "unread" }],
-      "fieldConfig": { "defaults": { "unit": "short", "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 16 } }, "overrides": [] },
-      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": false }, "tooltip": { "mode": "single", "sort": "none" } }
-    },
-    {
-      "id": 10,
-      "type": "timeseries",
-      "title": "Process CPU",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 7, "w": 12, "x": 12, "y": 22 },
-      "targets": [{ "refId": "A", "expr": "process_cpu_usage", "legendFormat": "process cpu" }],
-      "fieldConfig": { "defaults": { "unit": "percentunit", "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 16 } }, "overrides": [] },
-      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": false }, "tooltip": { "mode": "single", "sort": "none" } }
     }
   ],
   "schemaVersion": 39,
-  "tags": ["hr-manager", "spring-boot"],
+  "tags": ["hr-manager", "spring-boot", "technical"],
   "templating": { "list": [] },
   "time": { "from": "now-6h", "to": "now" },
   "timezone": "browser",
-  "title": "HR Manager Overview",
-  "uid": "hr-manager-overview",
+  "title": "HR Manager Technical",
+  "uid": "hr-manager-technical",
   "version": 1
 }

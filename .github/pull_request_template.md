@@ -8,7 +8,8 @@
 - [ ] `cd web && npm run build` 通过
 - [ ] `mvn -B -ntp verify` 通过
 - [ ] 主流程改动 `cd web && npm run e2e` 通过
-- [ ] 监控/指标变更已更新 `BusinessMetrics` 和 `docs/MONITORING.md`
+- [ ] 技术指标变更已更新 `docs/MONITORING.md`
+- [ ] 没有为监控在业务 service 中新增埋点
 - [ ] `src/main/resources/static` 没有被 git 跟踪
 - [ ] 数据库变更已同步 `schema.sql`, `schema-mysql.sql`, 实体和 `docs/DATA-MODEL.md`
 - [ ] 接口变更已更新 `docs/API.md`

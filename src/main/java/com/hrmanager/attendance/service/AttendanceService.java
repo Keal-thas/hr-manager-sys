@@ -12,7 +12,6 @@ import com.hrmanager.attendance.mapper.AttendanceBatchMapper;
 import com.hrmanager.attendance.mapper.AttendancePenaltyMapper;
 import com.hrmanager.attendance.mapper.AttendanceRecordMapper;
 import com.hrmanager.common.BusinessException;
-import com.hrmanager.common.BusinessMetrics;
 import com.hrmanager.common.PageResult;
 import com.hrmanager.dept.service.DepartmentService;
 import com.hrmanager.notice.service.MessageService;
@@ -47,7 +46,6 @@ public class AttendanceService {
     private final UserService userService;
     private final DepartmentService departmentService;
     private final MessageService messageService;
-    private final BusinessMetrics metrics;
 
     public PageResult<Map<String, Object>> pageBatches(int page, int size) {
         Page<AttendanceBatch> result = batchMapper.selectPage(new Page<>(page, size),
@@ -216,7 +214,6 @@ public class AttendanceService {
                             + "，请尽快前往员工自助-我的考勤中签收，若有疑问请联系人事部门。",
                     batch.getId());
         }
-        metrics.attendanceUpload(uploadMode);
         return batchView(batch);
     }
 
@@ -275,7 +272,6 @@ public class AttendanceService {
             messageService.send(record.getUserId(), "ABNORMAL".equals(remindType) ? "ATTENDANCE_ABNORMAL" : "ATTENDANCE_REMIND",
                     "ABNORMAL".equals(remindType) ? "考勤异常提醒" : "考勤提醒", content, batchId);
         }
-        metrics.attendanceRemind(remindType);
         return records.size();
     }
 
@@ -329,7 +325,6 @@ public class AttendanceService {
                 penaltyMapper.updateById(penalty);
             }
         }
-        metrics.attendancePenaltyUpload(rows.size());
         return rows.size();
     }
 
@@ -433,7 +428,6 @@ public class AttendanceService {
             record.setAgree(true);
             record.setUpdatedAt(LocalDateTime.now());
             recordMapper.updateById(record);
-            metrics.attendanceConfirm();
         }
         return recordView(record, batch, true);
     }

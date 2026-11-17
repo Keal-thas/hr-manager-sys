@@ -13,7 +13,7 @@ Mandatory rules:
 - After frontend changes, run `cd web && npm test && npm run build`. Do not commit the generated `src/main/resources/static`.
 - After login, attendance, notice, or layout changes, run `cd web && npm run e2e`.
 - Run `bash scripts/agent-check.sh full` before delivery.
-- Update `BusinessMetrics` and `docs/MONITORING.md` when business events change.
+- Monitoring is technical only. Do not inject metrics into business services. Update `docs/MONITORING.md` when technical metrics change.
 - Add `data-testid` to interactive elements used by E2E.
 - Do not add WeCom or external integrations unless requested.
 - Never store the public archive password in the repository.

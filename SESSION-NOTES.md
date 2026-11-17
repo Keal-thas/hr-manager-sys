@@ -506,15 +506,23 @@ spring-boot-starter-actuator
 micrometer-registry-prometheus
 ```
 
-新增代码:
+监控范围:
 
 ```text
-common/BusinessMetrics.java
-  登录, 改密, 考勤上传/确认/提醒, 异常导入, 通知, 消息计数
-
-config/MetricsConfig.java
-  有效用户, 有效部门, 考勤批次, 未确认考勤, 未读消息 Gauge
+HTTP    http_server_requests_seconds_*
+JVM     jvm_memory_*, jvm_gc_*, jvm_threads_*
+进程    process_cpu_usage, process_uptime_seconds
+系统    system_cpu_usage, system_load_average_1m
+连接池  hikaricp_connections_*
+健康    /actuator/health
 ```
+
+设计取舍:
+
+- 只做技术指标
+- 业务 service 不注入 metrics
+- 不新增业务健康埋点
+- 业务健康如果后续需要, 用独立只读 exporter
 
 配置:
 
@@ -533,9 +541,10 @@ application.yml
 ```text
 support/MonitoringApiTests
   health UP
-  prometheus 含 hr_auth_login_total
-  prometheus 含 hr_users_active
   prometheus 含 http_server_requests_seconds
+  prometheus 含 jvm_memory_used_bytes
+  prometheus 含 process_cpu_usage
+  prometheus 不含 hr_business
   metrics 目录可读
 ```
 
@@ -631,15 +640,16 @@ ops/monitoring/prometheus.yml
 ops/monitoring/alert-rules.yml
 ops/monitoring/grafana/provisioning/datasources/prometheus.yml
 ops/monitoring/grafana/provisioning/dashboards/dashboards.yml
-ops/monitoring/grafana/dashboards/hr-manager-overview.json
+ops/monitoring/grafana/dashboards/hr-manager-technical.json
 ```
 
 能力:
 
 - Prometheus 抓取 `/actuator/prometheus`
-- Grafana 自动加载 HR Manager Overview
-- 面板覆盖 5xx, P95, QPS, 登录结果, 考勤/通知业务量, 未读, JVM, CPU
-- 告警规则覆盖 5xx, 登录失败突增, 考勤积压, 应用不可达
+- Grafana 自动加载 HR Manager Technical
+- 面板覆盖 5xx, P95, QPS, HTTP 状态码, JVM 堆, JVM 线程, CPU, Hikari
+- 告警规则覆盖应用不可达, 5xx, P95, 进程 CPU, Hikari 饱和
+- Prometheus 主动 drop `hr_business_.*`
 
 ### 8.6 文档
 
@@ -689,3 +699,22 @@ target/hr-manager-sys-0.0.1-SNAPSHOT.jar
 - 监控栈 compose 配置已校验; 本机 Docker daemon 未运行, 未实际启动容器
 - 告警规则未接 Alertmanager
 - E2E 只跑 Chromium
+
+### 8.9 业务指标取舍
+
+最初尝试在 `BusinessMetrics` 中记录登录, 考勤, 通知等业务事件.
+
+该方案已撤销, 原因:
+
+- 业务 service 注入 metrics, 业务逻辑和监控耦合
+- 每加一个业务指标都要改业务代码
+- 业务指标口径变化快, 不适合和 Prometheus 技术指标混在一起
+- 当前没有独立 exporter, 不适合直接上业务健康指标
+
+最终决定:
+
+- 监控只保留技术指标
+- 业务健康如果后续需要, 使用独立只读 exporter 或日志平台
+- 不在业务 service 中为监控加分支或埋点
+
+`MonitoringApiTests` 增加了负向断言: `/actuator/prometheus` 不能出现 `hr_business`.

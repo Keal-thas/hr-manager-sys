@@ -227,7 +227,7 @@ curl http://localhost:8080/actuator/health
 curl http://localhost:8080/actuator/prometheus
 ```
 
-业务指标命名见 [MONITORING.md](MONITORING.md).
+技术指标说明见 [MONITORING.md](MONITORING.md).
 
 生产环境建议只在内网暴露 Actuator, 或使用独立管理端口.
 

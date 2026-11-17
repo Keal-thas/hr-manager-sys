@@ -118,10 +118,11 @@ Always update:
 
 ## Monitoring
 
-- Business events must update `BusinessMetrics`.
+- Monitoring is technical only: HTTP, JVM, process, HikariCP, health.
+- Do not inject metrics into business services.
+- Do not add business health metrics without a separate exporter design.
 - Do not add high-cardinality labels (user id, employee no, timestamps).
-- Add DB snapshot gauges in `MetricsConfig`.
-- Update `docs/MONITORING.md` when metrics change.
+- Update `docs/MONITORING.md` when technical metrics or alerts change.
 - Actuator endpoints are `/actuator/health`, `/actuator/metrics`, `/actuator/prometheus`.
 
 ## Commit style

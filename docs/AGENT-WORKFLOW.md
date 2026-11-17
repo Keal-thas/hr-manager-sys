@@ -115,13 +115,15 @@ npm run e2e
 
 ### 2.5 监控/指标
 
+当前只做技术指标.
+
 步骤:
 
-1. 业务事件加到 `BusinessMetrics`
-2. 在 service 成功路径调用, 不要在循环里重复计数
-3. 高基数标签禁止使用用户 ID, 工号, 时间戳
-4. 需要数据库快照时加到 `MetricsConfig` 的 Gauge
-5. 更新 `docs/MONITORING.md` 指标表
+1. 优先复用 Actuator/Micrometer 自动指标
+2. 不在业务 service 中注入 metrics
+3. 不新增业务健康埋点
+4. 确实需要业务健康时, 先设计独立只读 exporter
+5. 更新 `docs/MONITORING.md` 指标和告警说明
 6. 补 `MonitoringApiTests`
 
 验证:

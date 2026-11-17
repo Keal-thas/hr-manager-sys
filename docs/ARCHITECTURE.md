@@ -190,15 +190,13 @@ flowchart LR
     ACT --> PROM[Prometheus]
     PROM --> GRAF[Grafana]
     PROM --> ALERT[Alert rules]
-    ACT --> JVM[JVM / HTTP / Hikari metrics]
-    APP --> BIZ[BusinessMetrics]
-    BIZ --> ACT
+    ACT --> JVM[JVM / HTTP / Hikari / process metrics]
 ```
 
-- `BusinessMetrics` 记录登录, 改密, 考勤上传/确认/提醒, 通知, 消息.
-- `MetricsConfig` 注册用户, 部门, 批次, 未确认考勤, 未读消息 Gauge.
-- Actuator 自动提供 HTTP, JVM, 连接池指标.
-- `ops/monitoring` 提供 Prometheus, 告警规则, Grafana 数据源和 dashboard.
+- Actuator 和 Micrometer 自动提供 HTTP, JVM, 进程, 连接池指标.
+- 业务 service 不注入 metrics, 避免业务逻辑和监控耦合.
+- 业务健康监控当前不做. 如后续需要, 使用独立只读 exporter.
+- `ops/monitoring` 提供 Prometheus, 告警规则, Grafana 数据源和技术 dashboard.
 
 详细指标和排障见 [MONITORING.md](MONITORING.md).
 

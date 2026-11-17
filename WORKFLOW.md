@@ -254,7 +254,7 @@ Agent 必须:
 - 遵守 JDK 8 限制
 - 修改后运行 `bash scripts/agent-check.sh quick|standard|full`
 - 前端改动补 `data-testid` 和 E2E 断言
-- 业务事件改动补 `BusinessMetrics` 和监控测试
+- 监控只做技术指标, 不在业务 service 中加埋点
 - 更新文档
 - 不绕过 hooks
 - 不提交禁止文件

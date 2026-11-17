@@ -6,10 +6,16 @@ rule_files:
   - /etc/prometheus/alert-rules.yml
 
 scrape_configs:
-  - job_name: hr-manager-sys
+  - job_name: hr-manager-technical
     metrics_path: /actuator/prometheus
     static_configs:
       - targets:
           - host.docker.internal:8080
         labels:
           application: hr-manager-sys
+    metric_relabel_configs:
+      # Business health metrics are intentionally out of scope.
+      # Drop the prefix if a future exporter or experiment adds it.
+      - source_labels: [__name__]
+        regex: hr_business_.*
+        action: drop

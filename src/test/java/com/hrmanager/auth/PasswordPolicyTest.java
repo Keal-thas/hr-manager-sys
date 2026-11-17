@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PasswordPolicyTest {
 
-    private final AuthService authService = new AuthService(null, null, null, null, null, null);
+    private final AuthService authService = new AuthService(null, null, null, null, null);
 
     @Test
     void acceptsStrongPassword() {

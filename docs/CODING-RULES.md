@@ -74,11 +74,13 @@ Entity      Xxx
 
 ## 7. 监控
 
-- 业务事件统一走 `BusinessMetrics`.
+- 只做技术指标: HTTP, JVM, 进程, HikariCP, health.
+- 不在业务 service 中注入 metrics.
+- 不为监控在业务逻辑里加分支.
 - 指标标签只放低基数字段.
 - 禁止把用户 ID, 工号, 时间戳放进标签.
-- 新增 DB 快照指标放 `MetricsConfig`.
-- 新增业务指标同步更新 `docs/MONITORING.md`.
+- 业务健康如需监控, 先设计独立只读 exporter.
+- 技术指标或告警变更同步更新 `docs/MONITORING.md`.
 
 ## 8. DOCX 工具
 

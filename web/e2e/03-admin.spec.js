@@ -52,11 +52,12 @@ test.describe('管理员流程', () => {
     expect(health.status()).toBe(200);
     expect((await health.json()).status).toBe('UP');
 
-    await login(page, '10001', 'Admin1234');
+    await page.request.get('/api/health');
     const metrics = await page.request.get('/actuator/prometheus');
     expect(metrics.status()).toBe(200);
     const text = await metrics.text();
-    expect(text).toContain('hr_auth_login_total');
     expect(text).toContain('http_server_requests_seconds');
+    expect(text).toContain('jvm_memory_used_bytes');
+    expect(text).not.toContain('hr_business');
   });
 });

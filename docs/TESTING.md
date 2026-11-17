@@ -66,7 +66,7 @@ src/test/java/com/hrmanager/support/SchemaConsistencyTest.java
 
 src/test/java/com/hrmanager/support/MonitoringApiTests.java
   /actuator/health 为 UP
-  /actuator/prometheus 暴露业务计数和 HTTP 指标
+  /actuator/prometheus 暴露 HTTP, JVM, 进程指标, 不含业务指标
   /actuator/metrics 目录可读
 ```
 
