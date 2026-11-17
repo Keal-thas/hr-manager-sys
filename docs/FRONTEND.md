@@ -219,3 +219,64 @@ web/test-results/
 ```
 
 两者都已加入 `.gitignore`.
+
+
+## 9. 企业微信 H5 规划 (未实现)
+
+当前前端只服务 PC 管理端和普通浏览器. 还没有企业微信内嵌 H5.
+
+如果后续接入, 原则是:
+
+```text
+共享 api.js, theme.js, 校验和业务组件
+独立 WeComLayout 和员工页面
+不把 AppLayout 和管理端宽表搬进企业微信
+```
+
+规划目录:
+
+```text
+web/src/wecom/
+  WeComLayout.jsx
+  WeComHome.jsx
+  WeComAttendance.jsx
+  WeComMessages.jsx
+  WeComProfile.jsx
+```
+
+布局:
+
+```text
+手机企业微信    底部 Tab, 卡片, 全屏签名
+PC 企业微信     最大宽度 720-900, 居中, 卡片
+管理后台        保持现有侧栏和宽表
+```
+
+断点:
+
+```text
+< 600px
+600-900px
+> 900px
+```
+
+考勤明细按组展示:
+
+```text
+基础信息
+出勤汇总
+请假和异常
+加班和调休
+签字确认
+```
+
+E2E 规划:
+
+```text
+390x844 手机视口
+800x900 企业微信 PC 窄窗口
+```
+
+只覆盖 Chromium, 不扩跨浏览器矩阵.
+
+OAuth 和签名属于后续阶段, 见 [WECOM.md](WECOM.md).

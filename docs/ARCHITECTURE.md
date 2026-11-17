@@ -183,6 +183,27 @@ sequenceDiagram
 - token 失效只重试一次
 - 发送日志记录 SENT, FAILED, SKIPPED
 
+## 7.2 企业微信 H5 (规划中)
+
+当前未实现. 规划流程:
+
+```text
+企业微信 H5
+  -> OAuth code
+  -> 后端换 userid
+  -> 匹配 sys_user.wecom_user_id
+  -> 建立会话
+  -> WeComLayout 员工页面
+```
+
+页面形态:
+
+- 手机企业微信: 底部 Tab, 卡片, 全屏签名
+- PC 企业微信: 最大宽度 720-900, 居中
+- PC 管理端: 现有 AppLayout 不变
+
+共享 `api.js`, `theme.js` 和业务组件, 不复制两套系统.
+
 ## 8. 前端结构
 
 ```text
