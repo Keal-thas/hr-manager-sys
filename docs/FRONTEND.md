@@ -177,6 +177,7 @@ npm run e2e
 ```
 
 默认使用本机 Chrome (`channel: 'chrome'`), 避免下载 Playwright 自带浏览器.
+E2E 只跑 Chromium, 这是有意选择, 不维护跨浏览器矩阵.
 CI 或本机没有 Chrome 时:
 
 ```bash

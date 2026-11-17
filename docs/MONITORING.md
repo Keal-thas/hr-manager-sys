@@ -238,7 +238,7 @@ hr-manager-technical
 | `HighProcessCpu` | 进程 CPU > 85% 持续 10 分钟 | warning |
 | `HikariPoolSaturation` | pending > 5 或 active/max > 90% | warning |
 
-规则只定义在 Prometheus. 要真正发送通知, 需要接入 Alertmanager, 当前仓库不包含.
+规则只定义在 Prometheus. 告警通知链路不在当前范围, 需要时再接 Alertmanager.
 告警阈值是演示值, 生产按实际流量调整.
 
 ## 8. 排障

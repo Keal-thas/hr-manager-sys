@@ -270,5 +270,5 @@ PR 必须等 CI 通过.
 - MySQL 集成测试依赖 Docker, 本地无 Docker 时会跳过
 - 没有 5000 条导入和 5000 人消息的压测
 - admin 路径权限映射需要随新接口维护
-- E2E 当前只覆盖 Chromium, 没有跨浏览器矩阵
-- 没有真实告警通知链路 (Alertmanager)
+- E2E 只覆盖 Chromium, 这是有意选择, 不做跨浏览器矩阵
+- Prometheus 告警不接 Alertmanager, 通知链路不在当前范围

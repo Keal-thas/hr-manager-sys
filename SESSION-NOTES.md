@@ -389,8 +389,6 @@ npm run build
 - 考勤异常清单上传
 - 5000 条导入和 5000 人消息性能
 - admin 新接口权限映射维护
-- 跨浏览器 E2E 矩阵
-- Alertmanager 真实告警通知
 
 建议后续:
 
@@ -695,9 +693,8 @@ target/hr-manager-sys-0.0.1-SNAPSHOT.jar
 ### 8.8 已知限制
 
 - 本机没有下载 Playwright 自带 Chromium, 使用系统 Chrome; CI 会安装
-- 监控栈 compose 配置已校验; 本机 Docker daemon 未运行, 未实际启动容器
-- 告警规则未接 Alertmanager
-- E2E 只跑 Chromium
+- E2E 只跑 Chromium, 这是有意选择, 不做跨浏览器矩阵
+- 告警通知不接 Alertmanager, 不在当前范围
 
 ### 8.9 业务指标取舍
 
@@ -830,7 +827,11 @@ GitHub Actions package              passed
 
 CI 中 `MySqlSchemaIntegrationTests` 实际执行, 耗时约 23.7 秒, 没有跳过.
 
-### 9.7 未完成
+### 9.7 运行验证
 
-- 本机 Docker daemon 未运行, 本地 MySQL 集成测试和监控容器没有实际启动
-- CI 已实际执行 MySQL 集成测试, 说明 Testcontainers 配置有效
+- 本机 Docker 已启动
+- Prometheus `hr-manager-technical` target 为 UP
+- Grafana health 正常, 自动加载 HR Manager Technical dashboard
+- Prometheus 可查询 `http_server_requests_seconds_count`
+- Prometheus 中不存在 `hr_business_*`
+- CI 已实际执行 MySQL 集成测试, 没有跳过
