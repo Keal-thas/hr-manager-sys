@@ -15,6 +15,7 @@
 - React 18 + Vite + Ant Design 5
 - Vitest (前端单元测试)
 - Playwright (浏览器 E2E)
+- Testcontainers (MySQL 集成测试)
 - Spring Boot Actuator + Micrometer + Prometheus
 - Prometheus + Grafana (可选监控栈)
 - Apache POI (Excel 导入导出)
@@ -164,6 +165,16 @@ mvn -DskipTests package
 ```bash
 java -jar target/hr-manager-sys-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
 ```
+
+`prod` profile 默认关闭演示数据:
+
+```yaml
+app:
+  seed:
+    enabled: false
+```
+
+首次部署需要自行创建管理员账号或临时开启种子数据.
 
 ## 主要 API
 
@@ -336,7 +347,9 @@ bash scripts/agent-check.sh standard
 bash scripts/agent-check.sh full
 ```
 
-集成测试使用 H2 内存库, 不依赖外部 MySQL. `SchemaConsistencyTest` 会校验 `schema.sql` 和 `schema-mysql.sql` 的表和列保持一致.
+集成测试默认使用 H2 内存库. `SchemaConsistencyTest` 会校验 `schema.sql` 和 `schema-mysql.sql` 的表和列保持一致.
+
+`MySqlSchemaIntegrationTests` 使用 Testcontainers 启动 MySQL 8, 真实执行 `schema-mysql.sql` 并验证种子数据和登录. 本机没有 Docker 时该用例自动跳过, CI 会执行.
 
 ## 公有 Release
 

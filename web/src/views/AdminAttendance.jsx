@@ -177,7 +177,7 @@ export default function AdminAttendance() {
             </Upload>
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit" loading={uploading}>上传</Button>
+            <Button type="primary" htmlType="submit" loading={uploading} data-testid="attendance-upload-submit">上传</Button>
           </Form.Item>
           <Form.Item>
             <Space>

@@ -30,8 +30,22 @@
 
 - 角色权限是菜单 code 的逗号分隔列表
 - 前端按菜单隐藏页面
-- 后端接口当前没有逐接口细粒度鉴权
-- 生产环境建议在每个 admin controller 上增加角色校验, 或使用 Spring Security
+- 后端 `AuthInterceptor` 对 `/api/admin/**` 做权限校验
+- 路径和权限映射:
+
+```text
+/api/admin/attendance   admin-attendance
+/api/admin/notices      admin-notice
+/api/admin/templates    admin-template
+/api/admin/departments  admin-dept
+/api/admin/roles        admin-role
+/api/admin/menus        admin-role
+/api/admin/users        admin-user
+```
+
+- 未映射的 `/api/admin/**` 默认拒绝
+- 新增 admin 接口时必须同步更新 `AuthInterceptor.requiredPermission`
+- `/api/dashboard`, `/api/menus`, `/api/my/**` 只要求登录
 
 ## 5. SQL 注入
 
@@ -113,8 +127,9 @@
 
 ## 11. 已知风险
 
-- 逐接口权限控制不完整
+- admin 路径权限映射需要随新接口维护, 未映射路径默认拒绝
 - 没有 CSRF Token
+- 生产环境必须关闭 `app.seed.enabled`, 避免写入演示账号
 - 签名 base64 存在数据库, 数据量大
 - 提醒同步插入, 5000 人时会慢
 - 没有审计日志

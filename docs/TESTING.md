@@ -38,6 +38,11 @@ src/test/java/com/hrmanager/auth/AuthApiTests.java
 src/test/java/com/hrmanager/auth/PasswordPolicyTest.java
   密码长度, 大小写, 数字, 空格, 汉字规则
 
+src/test/java/com/hrmanager/auth/AuthorizationApiTests.java
+  员工不能访问 admin 接口
+  HR 不能访问角色和菜单管理
+  管理员可以访问全部 admin 接口
+
 src/test/java/com/hrmanager/attendance/AttendanceApiTests.java
   管理员查看批次和明细
   考勤模板, 异常模板, 导出下载
@@ -68,6 +73,13 @@ src/test/java/com/hrmanager/support/MonitoringApiTests.java
   /actuator/health 为 UP
   /actuator/prometheus 暴露 HTTP, JVM, 进程指标, 不含业务指标
   /actuator/metrics 目录可读
+
+src/test/java/com/hrmanager/support/MySqlSchemaIntegrationTests.java
+  Testcontainers 启动 MySQL 8
+  执行 schema-mysql.sql
+  DataInitializer 在 MySQL 下写入种子数据
+  管理员登录成功
+  本机没有 Docker 时自动跳过, CI 会执行
 ```
 
 ## 3. 前端自动化测试
@@ -223,6 +235,7 @@ class SomeControllerTest {
 `.github/workflows/ci.yml`:
 
 - 后端 JDK 8: `mvn -B -ntp test`, 上传 surefire 和 JaCoCo 报告
+- GitHub Runner 有 Docker, `MySqlSchemaIntegrationTests` 会在 CI 执行
 - 前端 Node 20: `npm ci`, `npm test`, `npm run build`
 - 校验 `src/main/resources/static` 没有被 git 跟踪
 - package job 下载前端产物后打包 jar 并上传
@@ -254,8 +267,8 @@ PR 必须等 CI 通过.
 ## 9. 已知缺口
 
 - 没有性能测试和压测基线
-- 没有 MySQL profile 的自动集成测试
+- MySQL 集成测试依赖 Docker, 本地无 Docker 时会跳过
 - 没有 5000 条导入和 5000 人消息的压测
-- 后端接口细粒度权限还没有逐接口测试
+- admin 路径权限映射需要随新接口维护
 - E2E 当前只覆盖 Chromium, 没有跨浏览器矩阵
 - 没有真实告警通知链路 (Alertmanager)

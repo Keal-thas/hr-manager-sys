@@ -189,7 +189,7 @@ H2 和 MySQL 必须保持一致. 开发环境 H2 使用 `MODE=MySQL`.
   ```text
   web/e2e/01-auth.spec.js                 登录, 菜单, 退出
   web/e2e/02-employee-attendance.spec.js  考勤签名, 消息, 资料
-  web/e2e/03-admin.spec.js                用户/部门, 通知, 模板, 监控
+  web/e2e/03-admin.spec.js                用户/部门, 通知, 模板, Excel 上传, 监控
   ```
 - E2E 使用 `application-e2e.yml`, H2 内存库, 端口 18080.
 - 本机默认用系统 Chrome; CI 用 Playwright Chromium.
@@ -253,6 +253,8 @@ Agent 必须:
 - 按 `docs/AGENT-WORKFLOW.md` 的任务分类执行
 - 遵守 JDK 8 限制
 - 修改后运行 `bash scripts/agent-check.sh quick|standard|full`
+- 新增 `/api/admin/**` 接口时同步 `AuthInterceptor.requiredPermission`
+- 生产 profile 不允许写入演示数据
 - 前端改动补 `data-testid` 和 E2E 断言
 - 监控只做技术指标, 不在业务 service 中加埋点
 - 更新文档

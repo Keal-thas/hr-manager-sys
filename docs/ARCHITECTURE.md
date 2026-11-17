@@ -182,6 +182,9 @@ web/src/
 前端没有使用路由库, 通过 `view` 状态切换页面. 菜单由后端 `/api/auth/me` 返回.
 页面交互元素带 `data-testid`, 由 Playwright E2E 使用.
 
+后端 `AuthInterceptor` 除了登录校验, 还会按 `/api/admin/**` 路径检查角色权限.
+新增 admin 接口必须同步 `requiredPermission` 映射, 未映射路径默认拒绝.
+
 ## 8.1 可观测性
 
 ```mermaid

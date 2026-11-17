@@ -70,9 +70,11 @@ mvn -B -ntp test
 
 ```bash
 mvn -B -ntp -Dtest=SchemaConsistencyTest test
+mvn -B -ntp -Dtest=MySqlSchemaIntegrationTests test
 mvn -B -ntp verify
 ```
 
+`MySqlSchemaIntegrationTests` 需要 Docker, 没有 Docker 时自动跳过.
 必须保持 H2 和 MySQL 表名, 列名, 顺序一致.
 
 ### 2.3 前端功能
@@ -207,6 +209,7 @@ bash scripts/agent-check.sh full       # standard + E2E
 - 前端构建产物在 `src/main/resources/static`, 不要提交
 - H2 和 MySQL schema 必须同步
 - JDK 8 不支持 `var`, records, text blocks, `List.of`
+- 新增 admin 接口时必须同步更新 `AuthInterceptor.requiredPermission`
 - 改动作业前先看 `git status`, 不要把用户未完成的改动一起格式化
 - E2E 服务端口固定 `18080`, 避免和开发环境 `8080` 冲突
 - `npm run e2e` 会先 build, 再启动 Spring Boot, 最后跑 Playwright

@@ -387,9 +387,8 @@ npm run build
 
 - 部门/角色/用户全部增删改边界
 - 考勤异常清单上传
-- MySQL profile 自动集成测试
 - 5000 条导入和 5000 人消息性能
-- 非管理员前端页面级权限隔离
+- admin 新接口权限映射维护
 - 跨浏览器 E2E 矩阵
 - Alertmanager 真实告警通知
 
@@ -718,3 +717,114 @@ target/hr-manager-sys-0.0.1-SNAPSHOT.jar
 - 不在业务 service 中为监控加分支或埋点
 
 `MonitoringApiTests` 增加了负向断言: `/actuator/prometheus` 不能出现 `hr_business`.
+
+
+## 9. 本轮: 权限, 生产种子, MySQL 测试, Excel E2E
+
+### 9.1 后端权限
+
+`AuthInterceptor` 增加 `/api/admin/**` 权限校验:
+
+```text
+/api/admin/attendance   admin-attendance
+/api/admin/notices      admin-notice
+/api/admin/templates    admin-template
+/api/admin/departments  admin-dept
+/api/admin/roles        admin-role
+/api/admin/menus        admin-role
+/api/admin/users        admin-user
+```
+
+未映射的 `/api/admin/**` 默认拒绝.
+
+新增测试:
+
+```text
+AuthorizationApiTests
+  员工不能访问 admin 接口
+  HR 不能访问角色和菜单管理
+  管理员可以访问全部 admin 接口
+```
+
+### 9.2 生产种子数据
+
+`DataInitializer` 增加条件:
+
+```text
+app.seed.enabled=true
+```
+
+默认开启, `application-prod.yml` 关闭:
+
+```yaml
+app:
+  seed:
+    enabled: false
+```
+
+生产首次部署需要自行创建管理员账号, 或临时开启种子后立即关闭.
+
+### 9.3 MySQL 集成测试
+
+新增:
+
+```text
+src/test/java/com/hrmanager/support/MySqlSchemaIntegrationTests.java
+src/test/resources/application-mysql-test.yml
+pom.xml: testcontainers mysql + junit-jupiter
+```
+
+行为:
+
+- Testcontainers 启动 MySQL 8.0.36
+- 执行 `schema-mysql.sql`
+- 运行 `DataInitializer`
+- 管理员登录校验
+- 本机没有 Docker 时自动跳过, CI 会执行
+
+### 9.4 Excel 上传 E2E
+
+新增:
+
+```text
+web/e2e/fixtures/attendance-current-month.xlsx
+web/e2e/03-admin.spec.js
+  "管理员可以上传当月考勤"
+```
+
+流程:
+
+- 管理员登录
+- 上传真实 xlsx
+- 等待"上传成功"
+- 打开最新批次明细
+- 断言李四出现
+
+E2E 从 11 个用例增加到 12 个.
+
+### 9.5 文档
+
+更新:
+
+```text
+docs/SECURITY.md
+docs/TESTING.md
+docs/ARCHITECTURE.md
+docs/AGENT-WORKFLOW.md
+README.md
+WORKFLOW.md
+SESSION-NOTES.md
+```
+
+### 9.6 验证结果
+
+```text
+mvn -B -ntp verify          40 tests, 0 failures, 1 skipped (MySQL needs Docker)
+cd web && npm test          6 tests, 0 failures
+cd web && npm run e2e       12 passed
+```
+
+### 9.7 未完成
+
+- 本机 Docker daemon 未运行, MySQL 集成测试和监控容器没有实际启动
+- CI 会在 GitHub Runner 的 Docker 环境执行 MySQL 测试

@@ -47,6 +47,21 @@ test.describe('管理员流程', () => {
     await expect(page.getByText('张三').first()).toBeVisible();
   });
 
+
+  test('管理员可以上传当月考勤', async ({ page }) => {
+    await login(page, '10001', 'Admin1234');
+    await openMenu(page, 'admin-attendance');
+
+    await page.setInputFiles('input[type=file]', 'e2e/fixtures/attendance-current-month.xlsx');
+    await page.getByTestId('attendance-upload-submit').click();
+    await expectMessage(page, '上传成功');
+
+    await page.getByTestId('attendance-records-open').first().click();
+    const modal = page.locator('.ant-modal').filter({ hasText: '考勤明细' });
+    await expect(modal).toBeVisible();
+    await expect(modal.getByText('李四')).toBeVisible();
+  });
+
   test('监控端点可用', async ({ page }) => {
     const health = await page.request.get('/actuator/health');
     expect(health.status()).toBe(200);

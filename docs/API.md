@@ -208,6 +208,12 @@ POST /api/admin/users/{id}/status
 {"code":1,"message":"请先修改初始密码","data":null}
 ```
 
+```json
+{"code":1,"message":"无权限操作","data":null}
+```
+
+`/api/admin/**` 会按角色权限返回 403.
+
 ## 8. 监控端点
 
 Actuator 端点不在 `/api` 下, 不经过登录拦截器:

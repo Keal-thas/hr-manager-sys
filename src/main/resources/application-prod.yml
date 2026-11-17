@@ -16,3 +16,7 @@ springdoc:
     enabled: false
   swagger-ui:
     enabled: false
+
+app:
+  seed:
+    enabled: false
