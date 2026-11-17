@@ -819,12 +819,18 @@ SESSION-NOTES.md
 ### 9.6 验证结果
 
 ```text
-mvn -B -ntp verify          40 tests, 0 failures, 1 skipped (MySQL needs Docker)
-cd web && npm test          6 tests, 0 failures
-cd web && npm run e2e       12 passed
+mvn -B -ntp verify                  40 tests, 0 failures, 1 skipped (local, no Docker)
+cd web && npm test                  6 tests, 0 failures
+cd web && npm run e2e               12 passed
+GitHub Actions backend              40 tests, 0 failures, 0 skipped
+GitHub Actions frontend             passed
+GitHub Actions e2e                  12 passed
+GitHub Actions package              passed
 ```
+
+CI 中 `MySqlSchemaIntegrationTests` 实际执行, 耗时约 23.7 秒, 没有跳过.
 
 ### 9.7 未完成
 
-- 本机 Docker daemon 未运行, MySQL 集成测试和监控容器没有实际启动
-- CI 会在 GitHub Runner 的 Docker 环境执行 MySQL 测试
+- 本机 Docker daemon 未运行, 本地 MySQL 集成测试和监控容器没有实际启动
+- CI 已实际执行 MySQL 集成测试, 说明 Testcontainers 配置有效
