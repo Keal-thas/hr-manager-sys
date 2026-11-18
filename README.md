@@ -286,6 +286,7 @@ ops/monitoring/       Prometheus, Grafana, 告警规则
 - [docs/AGENT-WORKFLOW.md](docs/AGENT-WORKFLOW.md): AI agent 任务工作流
 - [docs/SECURITY.md](docs/SECURITY.md): 认证, 密码, 上传, 密钥
 - [docs/DECISIONS.md](docs/DECISIONS.md): 关键决策记录
+- [docs/UNIFIED-MYSQL.md](docs/UNIFIED-MYSQL.md): 统一 MySQL 方案, 测试和环境的数据库拓扑
 - [docs/CODING-RULES.md](docs/CODING-RULES.md): 编码约束
 - [docs/RELEASE.md](docs/RELEASE.md): 私有源码和公有压缩包流程
 - [WORKFLOW.md](WORKFLOW.md): 强制开发流程, hook, CI, 数据库和提交规则
