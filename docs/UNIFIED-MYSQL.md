@@ -157,13 +157,13 @@ MySQL `DATETIME` 默认精度为秒, 同一秒内多条记录会让 `ORDER BY cr
 以下位置需要补 `id` 作为排序兜底:
 
 ```text
-AttendanceService.latestBatch           AttendanceService.java:91, 95
-AttendanceService.findByYearMonth       AttendanceService.java:105
-AttendanceService 记录查询              AttendanceService.java:397
-UserService 列表                        UserService.java:52
-NoticeService 列表和模板                NoticeService.java:113, 128
-MessageService 列表                     MessageService.java:57
-WeComController 日志                    WeComController.java:40
+AttendanceService.latestBatch
+AttendanceService.findByYearMonth
+AttendanceService 记录查询
+UserService 列表
+NoticeService 列表和模板
+MessageService 列表
+WeComController 日志
 ```
 
 ## 9. 新的护栏
@@ -175,6 +175,8 @@ WeComController 日志                    WeComController.java:40
 2. 执行 db/migration/mysql
 3. 与 UAT/生产的实际 schema 比较 表, 列, 可空性, 默认值, 索引
 ```
+
+V3 迁移额外补充了考勤批次, 考勤记录和处罚编号的唯一索引, 校验时需要包含索引对比.
 
 它能发现跨库对比发现不了的问题:
 

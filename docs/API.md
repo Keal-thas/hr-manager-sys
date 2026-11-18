@@ -141,6 +141,19 @@ mode   NEW | OVERWRITE | INCREMENTAL
 file   xlsx
 ```
 
+线下签字:
+
+```http
+POST /api/admin/attendance/records/{id}/offline-signature
+Content-Type: multipart/form-data
+```
+
+字段:
+
+```text
+file   图片或 PDF, 最大 10MB
+```
+
 提醒类型:
 
 ```text

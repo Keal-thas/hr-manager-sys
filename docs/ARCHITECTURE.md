@@ -110,13 +110,16 @@ sequenceDiagram
     S->>DB: find batch by year/month
     alt NEW and exists
         S-->>C: error
+    else OVERWRITE and not latest
+        S-->>C: error
     else OVERWRITE
         S->>DB: delete records + penalties
     else INCREMENTAL
         S->>DB: load existing records
     end
     S->>DB: insert/update records
-    S->>DB: insert sys_message
+    S->>DB: refresh latest by year/month
+    S->>DB: insert sys_message for NEW/OVERWRITE or latest INCREMENTAL
     S-->>C: batch view
 ```
 
@@ -130,6 +133,8 @@ stateDiagram-v2
     UNREAD --> CONFIRMED: 直接确认
     READ --> UNREAD: 增量上传且未确认
     CONFIRMED --> CONFIRMED: 再次上传保留
+    UNREAD --> CONFIRMED: 管理员线下签字上传
+    READ --> CONFIRMED: 管理员线下签字上传
 ```
 
 ## 7. 通知发布流程
@@ -282,7 +287,7 @@ Flyway 启动时执行 db/migration/mysql
 
 ## 10. 非目标
 
-- 本期不做企微工作台员工自助、企微身份登录、电子签名和签字回溯, 缺口见 [README TODO](../README.md#todo-未实现的需求)
+- 本期不做企微工作台员工自助、企微身份登录、企微侧电子签名和签字过程回溯; 管理员线下签字上传已实现, 缺口见 [README TODO](../README.md#todo-未实现的需求)
 - 不做审批流
 - 不做 OCR
 - 不做复杂报表

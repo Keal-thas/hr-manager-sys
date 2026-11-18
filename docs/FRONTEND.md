@@ -66,6 +66,13 @@ App
 当前没有引入 React Router. 菜单 code 就是视图 key, 由 `App.jsx` 控制.
 这样保持单页演示简单, 后续如果要做深链接, 可以替换为 React Router 而不改页面 API.
 
+### 3.1 考勤与消息页面要点
+
+- 我的考勤: 年/月只读并带查询按钮; 打开签字前标记已阅读; 有处罚时展示处罚明细.
+- 消息通知: 标题检索, 状态筛选, 序号和发布日期, 未读加粗, 详情/阅读入口.
+- 考勤管理: 批次支持年/月筛选; 仅最新批次显示提醒; 非最新批次支持线下签字上传.
+- 通知管理: 发布时可选模板; 模板支持标题/状态查询, 停用和恢复.
+
 ## 4. 设计系统
 
 `src/theme.js` 定义 Ant Design token:
@@ -119,11 +126,14 @@ view-<view>
 menu-<view>
 dashboard-page
 my-attendance-page
+attendance-query
 attendance-sign-open
 attendance-agree
 signature-canvas
 attendance-sign-submit
 my-messages-page
+message-keyword
+message-status
 profile-page
 profile-save
 admin-attendance-page

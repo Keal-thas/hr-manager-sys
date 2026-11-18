@@ -149,7 +149,7 @@ admin-user
 | name | VARCHAR(100) | 是 | | 姓名快照 |
 | department_name | VARCHAR(100) | 是 | | 部门名称快照 |
 | status | VARCHAR(20) | 否 | | UNREAD / READ / CONFIRMED |
-| signature_image | TEXT | 是 | | 签名 base64 |
+| signature_image | TEXT | 是 | | 签名图片或 PDF base64 |
 | signature_time | TIMESTAMP | 是 | | 签名时间 |
 | agree | BOOLEAN | 是 | | 是否勾选同意 |
 | data_json | TEXT | 是 | | 导入时识别到的非空字段 |
@@ -287,8 +287,10 @@ NOTICE              系统通知
 | sys_department | code unique, parent_id |
 | attendance_batch | batch_year + batch_month unique |
 | attendance_record | batch_id + employee_no unique, user_id |
-| attendance_penalty | batch_id + code unique, batch_id |
+| attendance_penalty | batch_id + code unique |
 | sys_message | user_id + read_flag |
+
+V3 迁移增加 `attendance_batch`, `attendance_record` 和 `attendance_penalty` 的唯一索引.
 
 ## 14. 种子数据
 
@@ -297,7 +299,7 @@ NOTICE              系统通知
 - 4 个用户: 10001, 10002, 10003, 10004
 - 5 个部门: 信息科技部, 人力资源部, 财务部, 研发中心, 人事服务组
 - 3 个角色: ADMIN, HR, EMPLOYEE
-- 上个月考勤批次和 4 条明细
+- 当月考勤批次和 4 条明细
 - 1 条欢迎通知
 - 1 个通知模板
 
@@ -326,3 +328,5 @@ src/main/resources/db/migration/mysql/V<version>__<name>.sql
 9. 确认 `MySqlSchemaIntegrationTests` 通过
 
 不要修改已应用的迁移文件. 需要变更时新增下一个版本.
+
+AI agent 当前不运行测试, 由最终用户手动跑全量测试. 见 `AGENTS.md`.

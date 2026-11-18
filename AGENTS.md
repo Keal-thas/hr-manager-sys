@@ -19,14 +19,16 @@ This file is mandatory for AI agents working in this repository.
 1. `README.md`
 2. `WORKFLOW.md`
 3. `docs/DATA-MODEL.md`
-4. `docs/ARCHITECTURE.md`
-5. `docs/API.md`
-6. `docs/TESTING.md`
-7. `docs/FRONTEND.md`
-8. `docs/MONITORING.md`
-9. `docs/WECOM.md`
-10. `docs/AGENT-WORKFLOW.md`
-11. `SESSION-NOTES.md`
+4. `docs/FIELD-CONTRACT.md`
+5. `docs/DATA-SCOPE.md`
+6. `docs/ARCHITECTURE.md`
+7. `docs/API.md`
+8. `docs/TESTING.md`
+9. `docs/FRONTEND.md`
+10. `docs/MONITORING.md`
+11. `docs/WECOM.md`
+12. `docs/AGENT-WORKFLOW.md`
+13. `SESSION-NOTES.md`
 
 ## Stack constraints
 

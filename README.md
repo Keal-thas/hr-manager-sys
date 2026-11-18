@@ -4,7 +4,7 @@
 
 一个简化的 HR 管理系统, 覆盖考勤确认, 消息通知, 部门/角色/用户管理和权限菜单.
 
-需求来源是一份较粗的需求文档, 本项目按"能开发, 能演示, 保持简单"的原则做了取舍. 需求范围包含人事综合管理系统 PC 端和"企微同步实行"两部分; 本期只接入企业微信应用消息推送, 企微工作台员工自助、企微身份登录、电子签名和签字回溯仍未实现, 清单见 [TODO: 未实现的需求](#todo-未实现的需求).
+需求来源是一份较粗的需求文档, 本项目按"能开发, 能演示, 保持简单"的原则做了取舍. 需求范围包含人事综合管理系统 PC 端和"企微同步实行"两部分; 本期只接入企业微信应用消息推送, 企微工作台员工自助、企微身份登录、企微侧电子签名和签字回溯仍未实现, 清单见 [TODO: 未实现的需求](#todo-未实现的需求).
 
 ## 技术栈
 
@@ -192,30 +192,32 @@ POST /api/auth/change-password
 
 GET  /api/dashboard
 GET  /api/menus
-GET  /api/my/attendance/current
+GET  /api/my/attendance/current?year=&month=
 GET  /api/my/attendance/history
 GET  /api/my/attendance/{batchId}
 POST /api/my/attendance/{batchId}/confirm
-GET  /api/my/messages
+GET  /api/my/messages?status=&keyword=
 POST /api/my/messages/{id}/read
 POST /api/my/messages/read-all
 GET  /api/my/profile
 PUT  /api/my/profile
 
-GET  /api/admin/attendance/batches
+GET  /api/admin/attendance/batches?page=1&size=10&year=&month=
 POST /api/admin/attendance/upload
 GET  /api/admin/attendance/template
 GET  /api/admin/attendance/penalty-template
 GET  /api/admin/attendance/batches/{id}/records
 GET  /api/admin/attendance/records/{id}
+POST /api/admin/attendance/records/{id}/offline-signature
 POST /api/admin/attendance/batches/{id}/remind
 POST /api/admin/attendance/batches/{id}/penalties/upload
 GET  /api/admin/attendance/batches/{id}/export
 
 GET  /api/admin/notices
 POST /api/admin/notices
-GET  /api/admin/templates
+GET  /api/admin/templates?status=&keyword=
 POST /api/admin/templates
+POST /api/admin/templates/{id}/restore
 
 GET  /api/admin/departments
 GET  /api/admin/departments/tree
@@ -240,7 +242,7 @@ GET  /api/admin/wecom/logs?page=1&size=10
 
 ## 设计取舍
 
-- 企业微信本期只做应用消息推送, 站内消息和 WeCom 同时发送. 需求里的企微员工自助、企微身份登录、电子签名和签字回溯未实现, 见 TODO.
+- 企业微信本期只做应用消息推送, 站内消息和 WeCom 同时发送. 需求里的企微员工自助、企微身份登录、企微侧电子签名和签字回溯未实现, 见 TODO.
 - 部门最多 5 级. 原因是部门编码 10 位, 每级 2 位; 原需求里"6 级"和 10 位编码矛盾, 这里按 5 级实现.
 - 考勤数据当前实现把 Excel 中识别到的非空字段原样存入 `data_json`; 空单元格和未识别列不落库. 关键字段单独建列用于查询和状态流转. 是否拆列或建子表尚未决策.
 - 签名图片以 base64 存库, 方便演示; 生产建议换对象存储.
@@ -286,6 +288,8 @@ ops/monitoring/       Prometheus, Grafana, 告警规则
 ```
 
 ## 开发与工作流
+
+> AI agent 当前只改代码并直接提交, 不运行测试, 构建或 CI. 最终用户手动跑全量测试, 见 [AGENTS.md](AGENTS.md).
 
 - [docs/](docs/README.md): 文档索引
 - [docs/DATA-MODEL.md](docs/DATA-MODEL.md): ER 图, 表结构, 枚举, 索引

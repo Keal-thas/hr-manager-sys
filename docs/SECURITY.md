@@ -5,6 +5,7 @@
 - 工号 + 密码登录
 - 密码 BCrypt 存储
 - Session Cookie 保存登录态
+- 登录成功后调用 `changeSessionId` 防止 session fixation
 - `/api/**` 由 `AuthInterceptor` 保护
 - 未登录返回 401
 - 初始密码未修改时, 只允许修改密码, me, logout
@@ -19,10 +20,11 @@
 - 不能包含空格
 - 不能与原密码相同
 - 不能与初始密码相同
+- 初始密码为 `bydpcic@123`
 
 ## 3. 锁定策略
 
-- 连续 5 次密码错误
+- 连续 5 次密码错误, 包括修改密码时原密码错误
 - 锁定 15 分钟
 - 管理员重置密码可提前解锁
 
@@ -73,7 +75,8 @@
 
 ## 8. 文件上传
 
-- 只接受 Excel
+- 考勤导入只接受 Excel
+- 线下签字接受图片或 PDF, 单文件上限 10MB
 - 使用 Apache POI 解析
 - 生产建议校验扩展名, MIME, 文件头
 - 生产建议限制单文件大小和单次导入行数
@@ -119,7 +122,7 @@
 - 反向代理限制来源 IP
 - 或使用独立管理端口 `management.server.port=8081`
 - 不要把 Actuator 暴露到公网
-- 按需把 `management.endpoint.health.show-details` 改为 `when-authorized` 或 `never`
+- 生产配置已将 `management.endpoint.health.show-details` 设为 `never`
 
 ## 10. 生产检查清单
 
@@ -128,7 +131,7 @@
 - 限制 Actuator 暴露面, 只允许监控系统访问
 - 使用 HTTPS
 - 修改默认账号密码
-- 使用独立数据库账号, 最小权限
+- 使用独立数据库账号, 最小权限; 账号密码通过 `DB_USERNAME` / `DB_PASSWORD` 环境变量注入
 - 配置 Session 过期时间
 - 配置日志脱敏
 - 配置备份
