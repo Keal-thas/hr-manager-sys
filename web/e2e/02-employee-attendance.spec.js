@@ -12,6 +12,7 @@ test.describe('员工自助', () => {
     await page.getByTestId('attendance-sign-open').click();
     const modal = page.locator('.ant-modal').filter({ hasText: '考勤签字确认' });
     await expect(modal).toBeVisible();
+    await modal.click({ trial: true });
 
     await modal.getByTestId('attendance-agree').check();
 

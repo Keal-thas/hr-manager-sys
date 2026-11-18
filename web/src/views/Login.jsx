@@ -46,7 +46,7 @@ export default function Login({ onLogin }) {
           </div>
         </section>
 
-        <Card className="login-card" bordered={false}>
+        <Card className="login-card" variant="borderless">
           <Typography.Title level={3} style={{ textAlign: 'center', marginBottom: 4 }}>
             人事综合管理系统
           </Typography.Title>

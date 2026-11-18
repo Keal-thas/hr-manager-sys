@@ -15,10 +15,11 @@ export default defineConfig({
     chunkSizeWarningLimit: 1200,
     rollupOptions: {
       output: {
-        manualChunks: {
-          react: ['react', 'react-dom'],
-          antd: ['antd', '@ant-design/icons'],
-          axios: ['axios']
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return;
+          if (id.includes('/antd/') || id.includes('@ant-design')) return 'antd';
+          if (id.includes('/react-dom/') || id.includes('/react/')) return 'react';
+          if (id.includes('/axios/')) return 'axios';
         }
       }
     }
