@@ -257,7 +257,7 @@ sys_message
 
 关键设计:
 
-- 考勤完整字段放 `attendance_record.data_json`
+- 考勤导入时识别到的非空字段放 `attendance_record.data_json`
 - 关键查询字段单独建列: employee_no, user_id, status, batch_id
 - 部门最多 5 级, 10 位编码每级 2 位
 - 逻辑删除用 status, 不做物理删除

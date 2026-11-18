@@ -1,0 +1,85 @@
+entity,key,current_key,label,tag,type,measure,required,source,scene,importable,freeze,rule
+attendance_batch,id,id,主键,K,integer,PK,Y,系统,通用,N,Y,
+attendance_batch,batch_year,batch_year,考勤年份,K,integer,2000-2100,Y,上传表单,通用,N,Y,year+month 唯一
+attendance_batch,batch_month,batch_month,考勤月份,K,integer,1-12,Y,上传表单,通用,N,Y,year+month 唯一
+attendance_batch,status,status,批次状态,S,enum,PUBLISHED,Y,流程,通用,N,N,
+attendance_batch,upload_mode,upload_mode,上传方式,D,enum,NEW/OVERWRITE/INCREMENTAL,Y,上传表单,通用,N,Y,
+attendance_batch,created_by,created_by,上传人,K,integer,FK sys_user.id,N,当前登录用户,通用,N,Y,
+attendance_batch,created_at,created_at,创建时间,A,datetime,,N,系统,通用,N,Y,
+attendance_batch,published_at,published_at,发布时间,A,datetime,,N,系统,通用,N,Y,
+attendance_batch,latest,latest,是否最新批次,C,boolean,,N,系统,通用,N,N,按批次时间维护
+attendance_record,id,id,主键,K,integer,PK,Y,系统,通用,N,Y,
+attendance_record,batch_id,batch_id,批次,K,integer,FK attendance_batch.id,Y,系统,通用,N,Y,
+attendance_record,employee_no,employee_no,工号,K,string,^\d+$,Y,考勤清单,通用,Y,Y,批次内唯一
+attendance_record,user_id,user_id,用户,K,integer,FK sys_user.id,N,按工号匹配,通用,N,Y,
+attendance_record,name,name,姓名,T,string,等于用户姓名,Y,考勤清单,通用,Y,Y,快照
+attendance_record,department_name,department_name,部门,C,string,,Y,用户主数据,通用,N,Y,按工号查; 忽略文件值; 快照
+attendance_record,status,status,考勤状态,S,enum,UNREAD/READ/CONFIRMED,Y,流程,通用,N,N,
+attendance_record,signature_image,signature_image,签名图片,T,string,base64,N,用户操作,通用,N,Y,
+attendance_record,signature_time,signature_time,签名时间,A,datetime,,N,系统,通用,N,Y,
+attendance_record,agree,agree,是否同意,S,boolean,,N,用户勾选,通用,N,Y,
+attendance_record,data_json,data_json,考勤负载,T,string,见 data_json 字段,N,系统组装,通用,N,N,
+attendance_record,created_at,created_at,创建时间,A,datetime,,N,系统,通用,N,Y,
+attendance_record,updated_at,updated_at,更新时间,A,datetime,,N,系统,通用,N,N,
+attendance_record.data_json,employee_no,工号,工号,K,string,^\d+$,Y,考勤清单,通用,Y,Y,以列 employee_no 为准
+attendance_record.data_json,name,姓名,姓名,T,string,等于用户姓名,Y,考勤清单,通用,Y,Y,快照
+attendance_record.data_json,department_name,部门,部门,C,string,,Y,用户主数据,通用,N,Y,按工号查; 原值仅快照
+attendance_record.data_json,pay_mode,计资方式,计资方式,T,string,最多100字符,Y,考勤清单,通用,Y,N,未定义枚举
+attendance_record.data_json,workday_absence_days,工作日缺勤天数,工作日缺勤天数,M,decimal,天; 6位,Y,考勤清单,通用,Y,N,
+attendance_record.data_json,extra_work_hours,加点小时数,加点小时数,M,decimal,小时; 6位,Y,考勤清单,通用,Y,N,
+attendance_record.data_json,overtime_hours,加班小时数,加班小时数,M,decimal,小时; 6位,Y,考勤清单,通用,Y,N,
+attendance_record.data_json,holiday_overtime_hours,法定节假日加班小时,法定节假日加班小时,M,decimal,小时; 6位,Y,考勤清单,通用,Y,N,
+attendance_record.data_json,piecework_attendance_days,计资类型变化/计件时应出勤天数,计资类型变化/计件时应出勤天数,M,decimal,天; 6位,Y,考勤清单,通用,Y,N,
+attendance_record.data_json,actual_attendance_days,实际出勤天数,实际出勤天数,M,decimal,天; 6位,Y,考勤清单,通用,Y,N,
+attendance_record.data_json,heat_days,高温天数,高温天数,M,decimal,天; 6位,Y,考勤清单,通用,Y,N,
+attendance_record.data_json,sick_leave_days,病假天数,病假天数,M,decimal,天; 6位,Y,考勤清单,通用,Y,N,
+attendance_record.data_json,work_injury_leave_days,工伤假天数,工伤假天数,M,decimal,天; 6位,Y,考勤清单,通用,Y,N,
+attendance_record.data_json,welfare_leave_days_fl,福利假天数合计-FL,福利假天数合计-FL,M,decimal,天; 6位,Y,考勤清单,通用,Y,N,需求未给公式; 不是 C
+attendance_record.data_json,welfare_leave_remark,福利假天数备注,福利假天数备注,T,string,最多100字符,N,考勤清单,通用,Y,N,
+attendance_record.data_json,prehire_postleave_workdays_da,入厂之前或离职之后当月工作日天数,入厂之前或离职之后当月工作日天数,M,decimal,天; 6位,Y,考勤清单,通用,Y,N,
+attendance_record.data_json,attendance_after_offset_d0,与加班冲抵后的缺勤天数+FL天数+DA,与加班冲抵后的缺勤天数+FL天数+DA,M,decimal,天; 6位,Y,考勤清单,通用,Y,N,需求未给公式; 不是 C
+attendance_record.data_json,due_attendance_days,应出勤天数,应出勤天数,M,decimal,天; 6位,Y,考勤清单,通用,Y,N,
+attendance_record.data_json,compensatory_leave_days,已调休天数,已调休天数,M,decimal,天; 6位,Y,考勤清单,通用,Y,N,
+attendance_record.data_json,annual_leave_days,本月年休天数,本月年休天数,M,decimal,天; 6位,Y,考勤清单,通用,Y,N,
+attendance_record.data_json,overtime_compensatory_hours,当月加班调休小时数,当月加班调休小时数,M,decimal,小时; 6位,Y,考勤清单,通用,Y,N,
+attendance_record.data_json,absenteeism_days,旷工天数,旷工天数,M,decimal,天; 6位,Y,考勤清单,通用,Y,N,
+attendance_record.data_json,late_within_10_minutes,迟到10分钟含以内,迟到10分钟含以内,M,decimal,次; 6位,Y,考勤清单,通用,Y,N,
+attendance_record.data_json,early_leave_within_10_minutes,早退10分钟含以内,早退10分钟含以内,M,decimal,次; 6位,Y,考勤清单,通用,Y,N,
+attendance_record.data_json,late_10_30_minutes,迟到10-30分钟含,迟到10-30分钟含,M,decimal,次; 6位,Y,考勤清单,通用,Y,N,
+attendance_record.data_json,early_leave_10_30_minutes,早退10-30分钟含,早退10-30分钟含,M,decimal,次; 6位,Y,考勤清单,通用,Y,N,
+attendance_record.data_json,late_over_30_minutes,迟到30分钟以上,迟到30分钟以上,M,decimal,次; 6位,Y,考勤清单,通用,Y,N,
+attendance_record.data_json,early_leave_over_30_minutes,早退30分钟以上,早退30分钟以上,M,decimal,次; 6位,Y,考勤清单,通用,Y,N,
+attendance_record.data_json,personal_checkin_abnormal_count,个人原因打卡/签到异常次数,个人原因打卡/签到异常次数,M,decimal,次; 6位,Y,考勤清单,通用,Y,N,
+attendance_record.data_json,performance_deduction_points_level1,下浮绩效点数(一级),下浮绩效点数(一级),M,decimal,点; 6位,Y,考勤清单,通用,Y,N,
+attendance_record.data_json,performance_bonus_deduction_level1,减少表现奖分数(一级),减少表现奖分数(一级),M,decimal,分; 6位,Y,考勤清单,通用,Y,N,
+attendance_record.data_json,performance_deduction_points_other,下浮绩效点数(其他),下浮绩效点数(其他),M,decimal,点; 6位,Y,考勤清单,通用,Y,N,
+attendance_record.data_json,performance_bonus_deduction_other,减少表现奖分数(其他),减少表现奖分数(其他),M,decimal,分; 6位,Y,考勤清单,通用,Y,N,
+attendance_record.data_json,employee_signature_confirm,员工本人签字确认,员工本人签字确认,C,enum,已确认/未确认,N,status,通用,N,N,导出映射; 不落库
+attendance_penalty,id,id,主键,K,integer,PK,Y,系统,通用,N,Y,
+attendance_penalty,batch_id,batch_id,批次,K,integer,FK attendance_batch.id,Y,系统,通用,N,Y,
+attendance_penalty,import_type,import_type,导入方式,D,enum,NEW/MODIFY,Y,异常清单,通用,Y,N,新增/修改 映射为 NEW/MODIFY
+attendance_penalty,code,code,编号,C,string,工号+两位月份+三位流水,Y,系统,新增,N,Y,文件必须为空
+attendance_penalty,code,code,编号,K,string,必须存在,Y,异常清单,修改,Y,Y,用于匹配
+attendance_penalty,employee_no,employee_no,工号,K,string,^\d+$,Y,异常清单,通用,Y,Y,必须存在于本批次考勤
+attendance_penalty,name,name,姓名,T,string,等于用户姓名,Y,异常清单,通用,Y,Y,快照
+attendance_penalty,department_name,department_name,部门,C,string,,Y,用户主数据,通用,N,Y,按工号查; 忽略文件值; 快照
+attendance_penalty,data_json,data_json,处罚负载,T,string,见 data_json 字段,N,系统组装,通用,N,N,
+attendance_penalty,created_at,created_at,创建时间,A,datetime,,N,系统,通用,N,Y,
+attendance_penalty.data_json,import_type,导入方式,导入方式,D,enum,新增/修改,Y,异常清单,通用,Y,N,
+attendance_penalty.data_json,code,编号,编号,C,string,工号+两位月份+三位流水,Y,系统,新增,N,Y,文件必须为空
+attendance_penalty.data_json,code,编号,编号,K,string,必须存在,Y,异常清单,修改,Y,Y,用于匹配
+attendance_penalty.data_json,employee_no,工号,工号,K,string,^\d+$,Y,异常清单,通用,Y,Y,必须存在于本批次考勤
+attendance_penalty.data_json,name,姓名,姓名,T,string,等于用户姓名,Y,异常清单,通用,Y,Y,快照
+attendance_penalty.data_json,department_name,部门,部门,C,string,,Y,用户主数据,通用,N,Y,按工号查; 忽略文件值; 快照
+attendance_penalty.data_json,issue_date,开单日期,开单日期,D,date,YYYY-MM-DD,N,异常清单,通用,Y,N,
+attendance_penalty.data_json,execution_month,执行月份,执行月份,D,string,YYYY-MM,N,异常清单,通用,Y,N,
+attendance_penalty.data_json,penalty_type,惩罚种类,惩罚种类,T,string,最多50字符,N,异常清单,通用,Y,N,未定义枚举
+attendance_penalty.data_json,penalty_level,处罚等级,处罚等级,T,string,最多50字符,Y,异常清单,通用,Y,N,
+attendance_penalty.data_json,penalty_tier,处罚层级,处罚层级,T,string,最多50字符,N,异常清单,通用,Y,N,
+attendance_penalty.data_json,policy_document,文件制度,文件制度,T,string,最多50字符,Y,异常清单,通用,Y,N,
+attendance_penalty.data_json,policy_clause,条例条款,条例条款,T,string,最多50字符,Y,异常清单,通用,Y,N,
+attendance_penalty.data_json,reason,原因,原因,T,string,最多50字符,Y,异常清单,通用,Y,N,
+attendance_penalty.data_json,suggested_business_unit,建议事业部,建议事业部,T,string,最多50字符,N,异常清单,通用,Y,N,
+attendance_penalty.data_json,suggested_by,建议人,建议人,T,string,最多50字符,N,异常清单,通用,Y,N,
+attendance_penalty.data_json,no_performance_months,无绩效奖或表现奖月数,无绩效奖或表现奖月数,M,decimal,月; 6位,N,异常清单,通用,Y,N,
+attendance_penalty.data_json,performance_bonus_points,绩效奖点数,绩效奖点数,M,decimal,点; 6位,N,异常清单,通用,Y,N,

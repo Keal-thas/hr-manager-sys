@@ -2,6 +2,10 @@
 
 本文档是数据库的权威说明. 修改表结构时必须同步更新本文件.
 
+字段级契约, 标签和导入规则见 [FIELD-CONTRACT.md](FIELD-CONTRACT.md).
+
+考勤与通知的业务数据模型见 [DATA-SCOPE.md](DATA-SCOPE.md).
+
 ## 1. ER 图
 
 ```mermaid
@@ -148,7 +152,7 @@ admin-user
 | signature_image | TEXT | 是 | | 签名 base64 |
 | signature_time | TIMESTAMP | 是 | | 签名时间 |
 | agree | BOOLEAN | 是 | | 是否勾选同意 |
-| data_json | TEXT | 是 | | 完整考勤字段 |
+| data_json | TEXT | 是 | | 导入时识别到的非空字段 |
 | created_at | TIMESTAMP | 是 | | |
 | updated_at | TIMESTAMP | 是 | | |
 
@@ -157,7 +161,7 @@ admin-user
 - 同一批次内 `employee_no` 逻辑唯一.
 - 姓名和部门是导入时的快照, 不随用户资料变化.
 - `CONFIRMED` 后再次增量上传, 状态保留.
-- `data_json` 是完整字段快照, 不参与查询; 关键字段单独建列.
+- `data_json` 是导入时识别到的非空字段快照, 空值和未识别列不落库, 不参与查询; 关键字段单独建列.
 
 ### data_json 字段
 
