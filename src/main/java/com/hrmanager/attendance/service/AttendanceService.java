@@ -23,10 +23,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -47,9 +49,17 @@ public class AttendanceService {
     private final DepartmentService departmentService;
     private final MessageService messageService;
 
-    public PageResult<Map<String, Object>> pageBatches(int page, int size) {
-        Page<AttendanceBatch> result = batchMapper.selectPage(new Page<>(page, size),
-                Wrappers.<AttendanceBatch>lambdaQuery().orderByDesc(AttendanceBatch::getCreatedAt));
+    public PageResult<Map<String, Object>> pageBatches(int page, int size, Integer year, Integer month) {
+        LambdaQueryWrapper<AttendanceBatch> wrapper = Wrappers.<AttendanceBatch>lambdaQuery()
+                .orderByDesc(AttendanceBatch::getBatchYear)
+                .orderByDesc(AttendanceBatch::getBatchMonth);
+        if (year != null) {
+            wrapper.eq(AttendanceBatch::getBatchYear, year);
+        }
+        if (month != null) {
+            wrapper.eq(AttendanceBatch::getBatchMonth, month);
+        }
+        Page<AttendanceBatch> result = batchMapper.selectPage(new Page<>(page, size), wrapper);
         List<Map<String, Object>> records = result.getRecords().stream()
                 .map(this::batchView)
                 .collect(Collectors.toList());
@@ -71,6 +81,9 @@ public class AttendanceService {
         item.put("confirmedCount", recordMapper.selectCount(Wrappers.<AttendanceRecord>lambdaQuery()
                 .eq(AttendanceRecord::getBatchId, batch.getId())
                 .eq(AttendanceRecord::getStatus, "CONFIRMED")));
+        item.put("readCount", recordMapper.selectCount(Wrappers.<AttendanceRecord>lambdaQuery()
+                .eq(AttendanceRecord::getBatchId, batch.getId())
+                .eq(AttendanceRecord::getStatus, "READ")));
         item.put("unreadCount", recordMapper.selectCount(Wrappers.<AttendanceRecord>lambdaQuery()
                 .eq(AttendanceRecord::getBatchId, batch.getId())
                 .eq(AttendanceRecord::getStatus, "UNREAD")));
@@ -88,14 +101,41 @@ public class AttendanceService {
     public AttendanceBatch latestBatch() {
         AttendanceBatch batch = batchMapper.selectOne(Wrappers.<AttendanceBatch>lambdaQuery()
                 .eq(AttendanceBatch::getLatest, true)
-                .orderByDesc(AttendanceBatch::getCreatedAt)
+                .orderByDesc(AttendanceBatch::getBatchYear)
+                .orderByDesc(AttendanceBatch::getBatchMonth)
                 .last("limit 1"));
         if (batch == null) {
             batch = batchMapper.selectOne(Wrappers.<AttendanceBatch>lambdaQuery()
-                    .orderByDesc(AttendanceBatch::getCreatedAt)
+                    .orderByDesc(AttendanceBatch::getBatchYear)
+                    .orderByDesc(AttendanceBatch::getBatchMonth)
                     .last("limit 1"));
         }
         return batch;
+    }
+
+    private void refreshLatest() {
+        AttendanceBatch latest = batchMapper.selectOne(Wrappers.<AttendanceBatch>lambdaQuery()
+                .orderByDesc(AttendanceBatch::getBatchYear)
+                .orderByDesc(AttendanceBatch::getBatchMonth)
+                .last("limit 1"));
+        batchMapper.update(null, Wrappers.<AttendanceBatch>lambdaUpdate()
+                .set(AttendanceBatch::getLatest, false));
+        if (latest != null) {
+            batchMapper.update(null, Wrappers.<AttendanceBatch>lambdaUpdate()
+                    .set(AttendanceBatch::getLatest, true)
+                    .eq(AttendanceBatch::getId, latest.getId()));
+        }
+    }
+
+    private boolean isLatestYearMonth(int year, int month) {
+        AttendanceBatch latest = batchMapper.selectOne(Wrappers.<AttendanceBatch>lambdaQuery()
+                .orderByDesc(AttendanceBatch::getBatchYear)
+                .orderByDesc(AttendanceBatch::getBatchMonth)
+                .last("limit 1"));
+        if (latest == null) {
+            return true;
+        }
+        return year * 100 + month >= latest.getBatchYear() * 100 + latest.getBatchMonth();
     }
 
     public AttendanceBatch findByYearMonth(int year, int month) {
@@ -138,6 +178,7 @@ public class AttendanceService {
             users.put(row.getEmployeeNo(), user);
         }
 
+        boolean latestBefore = isLatestYearMonth(year, month);
         AttendanceBatch existing = findByYearMonth(year, month);
         AttendanceBatch batch;
         if ("NEW".equals(uploadMode)) {
@@ -152,11 +193,13 @@ public class AttendanceService {
             batch.setCreatedBy(userId);
             batch.setCreatedAt(LocalDateTime.now());
             batch.setPublishedAt(LocalDateTime.now());
-            batch.setLatest(true);
             batchMapper.insert(batch);
         } else {
             if (existing == null) {
                 throw new BusinessException("该月份考勤不存在，请先新增考勤");
+            }
+            if ("OVERWRITE".equals(uploadMode) && !latestBefore) {
+                throw new BusinessException("仅最新批次支持覆盖上传");
             }
             batch = existing;
             if ("OVERWRITE".equals(uploadMode)) {
@@ -168,12 +211,9 @@ public class AttendanceService {
             batch.setUploadMode(uploadMode);
             batch.setStatus("PUBLISHED");
             batch.setPublishedAt(LocalDateTime.now());
-            batch.setLatest(true);
             batchMapper.updateById(batch);
         }
-        batchMapper.update(null, Wrappers.<AttendanceBatch>lambdaUpdate()
-                .set(AttendanceBatch::getLatest, false)
-                .ne(AttendanceBatch::getId, batch.getId()));
+        refreshLatest();
 
         Map<Long, String> deptNames = departmentService.nameMap();
         for (AttendanceRow row : rows) {
@@ -208,16 +248,26 @@ public class AttendanceService {
             } else {
                 recordMapper.updateById(record);
             }
-            String suffix = "OVERWRITE".equals(uploadMode) ? "已调整" : "已生成";
-            messageService.send(user.getId(), "ATTENDANCE", "考勤通知",
-                    user.getName() + "您好，您" + year + "年" + month + "月的考勤" + suffix
-                            + "，请尽快前往员工自助-我的考勤中签收，若有疑问请联系人事部门。",
-                    batch.getId());
+            boolean sendMessage = !"INCREMENTAL".equals(uploadMode) || latestBefore;
+            if (sendMessage) {
+                String suffix;
+                if ("OVERWRITE".equals(uploadMode)) {
+                    suffix = "已调整";
+                } else if ("INCREMENTAL".equals(uploadMode)) {
+                    suffix = isNew ? "已生成" : "已调整";
+                } else {
+                    suffix = "已生成";
+                }
+                messageService.send(user.getId(), "ATTENDANCE", "考勤通知",
+                        user.getName() + "您好，您" + year + "年" + month + "月的考勤" + suffix
+                                + "，请尽快前往员工自助-我的考勤中签收，若有疑问请联系人事部门。",
+                        batch.getId());
+            }
         }
         return batchView(batch);
     }
 
-    public PageResult<AttendanceRecord> pageRecords(Long batchId, int page, int size, String keyword, String status) {
+    public PageResult<Map<String, Object>> pageRecords(Long batchId, int page, int size, String keyword, String status) {
         LambdaQueryWrapper<AttendanceRecord> wrapper = Wrappers.<AttendanceRecord>lambdaQuery()
                 .eq(AttendanceRecord::getBatchId, batchId)
                 .orderByAsc(AttendanceRecord::getEmployeeNo);
@@ -229,7 +279,23 @@ public class AttendanceService {
             wrapper.eq(AttendanceRecord::getStatus, status);
         }
         Page<AttendanceRecord> result = recordMapper.selectPage(new Page<>(page, size), wrapper);
-        return new PageResult<>(result.getRecords(), result.getTotal(), result.getCurrent(), result.getSize());
+        List<Map<String, Object>> records = result.getRecords().stream()
+                .map(this::recordListView)
+                .collect(Collectors.toList());
+        return new PageResult<>(records, result.getTotal(), result.getCurrent(), result.getSize());
+    }
+
+    private Map<String, Object> recordListView(AttendanceRecord record) {
+        Map<String, Object> item = new HashMap<>();
+        item.put("id", record.getId());
+        item.put("batchId", record.getBatchId());
+        item.put("employeeNo", record.getEmployeeNo());
+        item.put("name", record.getName());
+        item.put("departmentName", record.getDepartmentName());
+        item.put("status", record.getStatus());
+        item.put("signatureTime", record.getSignatureTime());
+        item.put("agree", record.getAgree());
+        return item;
     }
 
     public Map<String, Object> recordDetail(Long id) {
@@ -242,8 +308,51 @@ public class AttendanceService {
     }
 
     @Transactional
+    public Map<String, Object> offlineSignature(Long recordId, MultipartFile file) {
+        AttendanceRecord record = recordMapper.selectById(recordId);
+        if (record == null) {
+            throw new BusinessException("考勤明细不存在");
+        }
+        if ("CONFIRMED".equals(record.getStatus())) {
+            throw new BusinessException("考勤已确认，无需重复上传");
+        }
+        if (file == null || file.isEmpty()) {
+            throw new BusinessException("请选择签字文件");
+        }
+        if (file.getSize() > 10 * 1024 * 1024) {
+            throw new BusinessException("签字文件不能超过10MB");
+        }
+        String contentType = file.getContentType();
+        if (contentType == null
+                || (!contentType.startsWith("image/") && !"application/pdf".equals(contentType))) {
+            throw new BusinessException("仅支持图片或PDF签字文件");
+        }
+        AttendanceBatch batch = getBatch(record.getBatchId());
+        if (Boolean.TRUE.equals(batch.getLatest())) {
+            throw new BusinessException("最新批次请使用在线签字");
+        }
+        try {
+            String signature = "data:" + contentType + ";base64,"
+                    + Base64.getEncoder().encodeToString(file.getBytes());
+            record.setSignatureImage(signature);
+            record.setSignatureTime(LocalDateTime.now());
+            record.setAgree(true);
+            record.setStatus("CONFIRMED");
+            record.setUpdatedAt(LocalDateTime.now());
+            recordMapper.updateById(record);
+            return recordView(record, batch, true);
+        } catch (IOException ex) {
+            throw new BusinessException("签字文件读取失败");
+        }
+    }
+
+    @Transactional
     public int remind(Long batchId, String type) {
         AttendanceBatch batch = getBatch(batchId);
+        AttendanceBatch latest = latestBatch();
+        if (latest == null || !latest.getId().equals(batchId)) {
+            throw new BusinessException("仅最新批次支持提醒");
+        }
         String remindType = type == null ? "ATTENDANCE" : type.toUpperCase();
         List<AttendanceRecord> records;
         if ("ABNORMAL".equals(remindType)) {
@@ -289,6 +398,12 @@ public class AttendanceService {
             if (!row.getName().equals(user.getName())) {
                 throw new BusinessException("工号" + row.getEmployeeNo() + "姓名不匹配");
             }
+            long attendanceCount = recordMapper.selectCount(Wrappers.<AttendanceRecord>lambdaQuery()
+                    .eq(AttendanceRecord::getBatchId, batchId)
+                    .eq(AttendanceRecord::getEmployeeNo, row.getEmployeeNo()));
+            if (attendanceCount == 0) {
+                throw new BusinessException("工号" + row.getEmployeeNo() + "不在该批次考勤中");
+            }
             AttendancePenalty penalty;
             if ("MODIFY".equals(row.getImportType())) {
                 penalty = penaltyMapper.selectOne(Wrappers.<AttendancePenalty>lambdaQuery()
@@ -328,7 +443,7 @@ public class AttendanceService {
         return rows.size();
     }
 
-    public PageResult<AttendancePenalty> pagePenalties(Long batchId, int page, int size, String keyword) {
+    public PageResult<Map<String, Object>> pagePenalties(Long batchId, int page, int size, String keyword) {
         LambdaQueryWrapper<AttendancePenalty> wrapper = Wrappers.<AttendancePenalty>lambdaQuery()
                 .eq(AttendancePenalty::getBatchId, batchId)
                 .orderByAsc(AttendancePenalty::getCode);
@@ -338,7 +453,36 @@ public class AttendanceService {
                     .or().like(AttendancePenalty::getCode, keyword));
         }
         Page<AttendancePenalty> result = penaltyMapper.selectPage(new Page<>(page, size), wrapper);
-        return new PageResult<>(result.getRecords(), result.getTotal(), result.getCurrent(), result.getSize());
+        List<Map<String, Object>> records = result.getRecords().stream()
+                .map(this::penaltyView)
+                .collect(Collectors.toList());
+        return new PageResult<>(records, result.getTotal(), result.getCurrent(), result.getSize());
+    }
+
+    private Map<String, Object> penaltyView(AttendancePenalty penalty) {
+        Map<String, Object> item = new HashMap<>();
+        item.put("id", penalty.getId());
+        item.put("batchId", penalty.getBatchId());
+        item.put("importType", penalty.getImportType());
+        item.put("code", penalty.getCode());
+        item.put("employeeNo", penalty.getEmployeeNo());
+        item.put("name", penalty.getName());
+        item.put("departmentName", penalty.getDepartmentName());
+        item.put("createdAt", penalty.getCreatedAt());
+        item.put("data", excelService.fromJson(penalty.getDataJson()));
+        return item;
+    }
+
+    private List<Map<String, Object>> penaltyViews(Long batchId, String employeeNo) {
+        List<AttendancePenalty> penalties = penaltyMapper.selectList(Wrappers.<AttendancePenalty>lambdaQuery()
+                .eq(AttendancePenalty::getBatchId, batchId)
+                .eq(AttendancePenalty::getEmployeeNo, employeeNo)
+                .orderByAsc(AttendancePenalty::getCode));
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (AttendancePenalty penalty : penalties) {
+            result.add(penaltyView(penalty));
+        }
+        return result;
     }
 
     public byte[] export(Long batchId) {
@@ -357,8 +501,13 @@ public class AttendanceService {
         return excelService.penaltyTemplate();
     }
 
-    public Map<String, Object> myCurrent(Long userId) {
-        AttendanceBatch batch = latestBatch();
+    public Map<String, Object> myCurrent(Long userId, Integer year, Integer month) {
+        AttendanceBatch batch;
+        if (year != null && month != null) {
+            batch = findByYearMonth(year, month);
+        } else {
+            batch = latestBatch();
+        }
         if (batch == null) {
             return null;
         }
@@ -445,6 +594,7 @@ public class AttendanceService {
         item.put("signatureTime", record.getSignatureTime());
         item.put("agree", record.getAgree());
         item.put("data", excelService.fromJson(record.getDataJson()));
+        item.put("penalties", penaltyViews(record.getBatchId(), record.getEmployeeNo()));
         if (includeSignature) {
             item.put("signatureImage", record.getSignatureImage());
         }

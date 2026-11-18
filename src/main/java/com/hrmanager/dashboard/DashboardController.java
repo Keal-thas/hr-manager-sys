@@ -46,7 +46,7 @@ public class DashboardController {
         result.put("unreadCount", messageService.unreadCount(loginUser.getId()));
         result.put("latestBatch", attendanceService.latestBatch() == null ? null
                 : attendanceService.batchView(attendanceService.latestBatch()));
-        result.put("myAttendance", attendanceService.myCurrent(loginUser.getId()));
+        result.put("myAttendance", attendanceService.myCurrent(loginUser.getId(), null, null));
         return ApiResponse.ok(result);
     }
 }

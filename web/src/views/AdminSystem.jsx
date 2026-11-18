@@ -153,7 +153,7 @@ export default function AdminSystem({ tab }) {
 
   const resetPassword = async (id) => {
     await api.post(`/admin/users/${id}/reset-password`, {});
-    message.success('密码已重置为 Init1234');
+    message.success('密码已重置为 bydpcic@123');
   };
 
   const toggleUser = async (record) => {
@@ -294,7 +294,7 @@ export default function AdminSystem({ tab }) {
                       render: (_, row) => (
                         <Space wrap>
                           <Button size="small" onClick={() => openUser(row)}>编辑</Button>
-                          <Popconfirm title="确认重置密码为 Init1234？" onConfirm={() => resetPassword(row.id)}>
+                          <Popconfirm title="确认重置密码为 bydpcic@123？" onConfirm={() => resetPassword(row.id)}>
                             <Button size="small">重置密码</Button>
                           </Popconfirm>
                           <Popconfirm title="确认切换用户状态？" onConfirm={() => toggleUser(row)}>
@@ -352,7 +352,7 @@ export default function AdminSystem({ tab }) {
             <Input />
           </Form.Item>
           {!editingUser ? (
-            <Form.Item name="password" label="初始密码" extra="不填则使用 Init1234">
+            <Form.Item name="password" label="初始密码" extra="不填则使用 bydpcic@123">
               <Input.Password />
             </Form.Item>
           ) : null}

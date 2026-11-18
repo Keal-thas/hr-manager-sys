@@ -35,8 +35,10 @@ public class AttendanceAdminController {
     @GetMapping("/batches")
     public ApiResponse<PageResult<Map<String, Object>>> batches(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        return ApiResponse.ok(attendanceService.pageBatches(page, size));
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month) {
+        return ApiResponse.ok(attendanceService.pageBatches(page, size, year, month));
     }
 
     @GetMapping("/batches/{id}")
@@ -61,7 +63,7 @@ public class AttendanceAdminController {
     }
 
     @GetMapping("/batches/{id}/records")
-    public ApiResponse<PageResult<AttendanceRecord>> records(
+    public ApiResponse<PageResult<Map<String, Object>>> records(
             @PathVariable Long id,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -73,6 +75,13 @@ public class AttendanceAdminController {
     @GetMapping("/records/{id}")
     public ApiResponse<Map<String, Object>> record(@PathVariable Long id) {
         return ApiResponse.ok(attendanceService.recordDetail(id));
+    }
+
+    @PostMapping("/records/{id}/offline-signature")
+    public ApiResponse<Map<String, Object>> offlineSignature(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file) {
+        return ApiResponse.ok(attendanceService.offlineSignature(id, file));
     }
 
     @PostMapping("/batches/{id}/remind")
@@ -92,7 +101,7 @@ public class AttendanceAdminController {
     }
 
     @GetMapping("/batches/{id}/penalties")
-    public ApiResponse<PageResult<AttendancePenalty>> penalties(
+    public ApiResponse<PageResult<Map<String, Object>>> penalties(
             @PathVariable Long id,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,

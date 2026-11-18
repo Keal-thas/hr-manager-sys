@@ -83,3 +83,4 @@ attendance_penalty.data_json,suggested_business_unit,建议事业部,建议事�
 attendance_penalty.data_json,suggested_by,建议人,建议人,T,string,最多50字符,N,异常清单,通用,Y,N,
 attendance_penalty.data_json,no_performance_months,无绩效奖或表现奖月数,无绩效奖或表现奖月数,M,decimal,月; 6位,N,异常清单,通用,Y,N,
 attendance_penalty.data_json,performance_bonus_points,绩效奖点数,绩效奖点数,M,decimal,点; 6位,N,异常清单,通用,Y,N,
+attendance_record.data_json,remark,说明,说明,T,string,最多2000字符,N,考勤清单,通用,Y,N,

@@ -51,14 +51,20 @@ public class MessageService {
         }
     }
 
-    public PageResult<SysMessage> page(Long userId, int page, int size, String type, Boolean unreadOnly) {
+    public PageResult<SysMessage> page(Long userId, int page, int size, String type, String status,
+                                       String keyword, Boolean unreadOnly) {
         LambdaQueryWrapper<SysMessage> wrapper = Wrappers.<SysMessage>lambdaQuery()
                 .eq(SysMessage::getUserId, userId)
                 .orderByDesc(SysMessage::getCreatedAt);
         if (StringUtils.hasText(type)) {
             wrapper.eq(SysMessage::getType, type);
         }
-        if (Boolean.TRUE.equals(unreadOnly)) {
+        if (StringUtils.hasText(keyword)) {
+            wrapper.like(SysMessage::getTitle, keyword.trim());
+        }
+        if ("READ".equalsIgnoreCase(status)) {
+            wrapper.eq(SysMessage::getReadFlag, true);
+        } else if ("UNREAD".equalsIgnoreCase(status) || Boolean.TRUE.equals(unreadOnly)) {
             wrapper.eq(SysMessage::getReadFlag, false);
         }
         Page<SysMessage> result = messageMapper.selectPage(new Page<>(page, size), wrapper);

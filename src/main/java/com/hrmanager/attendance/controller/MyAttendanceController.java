@@ -25,8 +25,11 @@ public class MyAttendanceController {
     private final AttendanceService attendanceService;
 
     @GetMapping("/current")
-    public ApiResponse<Map<String, Object>> current(HttpServletRequest request) {
-        return ApiResponse.ok(attendanceService.myCurrent(SessionUtil.current(request).getId()));
+    public ApiResponse<Map<String, Object>> current(
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month,
+            HttpServletRequest request) {
+        return ApiResponse.ok(attendanceService.myCurrent(SessionUtil.current(request).getId(), year, month));
     }
 
     @GetMapping("/history")

@@ -26,6 +26,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -51,15 +54,23 @@ public class AttendanceExcelService {
             "迟到10分钟含以内", "早退10分钟含以内", "迟到10-30分钟含", "早退10-30分钟含",
             "迟到30分钟以上", "早退30分钟以上", "个人原因打卡/签到异常次数",
             "下浮绩效点数(一级)", "减少表现奖分数(一级)", "下浮绩效点数(其他)",
-            "减少表现奖分数(其他)", "员工本人签字确认"
+            "减少表现奖分数(其他)", "员工本人签字确认", "说明"
     };
 
     private static final Set<String> REQUIRED = new HashSet<>(Arrays.asList(
-            "工号", "姓名", "计资方式", "工作日缺勤天数", "实际出勤天数", "应出勤天数"
+            "工号", "姓名", "部门", "计资方式", "工作日缺勤天数", "加点小时数", "加班小时数",
+            "法定节假日加班小时", "计资类型变化/计件时应出勤天数", "实际出勤天数", "高温天数",
+            "病假天数", "工伤假天数", "福利假天数合计-FL",
+            "入厂之前或离职之后当月工作日天数", "与加班冲抵后的缺勤天数+FL天数+DA",
+            "应出勤天数", "已调休天数", "本月年休天数", "当月加班调休小时数", "旷工天数",
+            "迟到10分钟含以内", "早退10分钟含以内", "迟到10-30分钟含", "早退10-30分钟含",
+            "迟到30分钟以上", "早退30分钟以上", "个人原因打卡/签到异常次数",
+            "下浮绩效点数(一级)", "减少表现奖分数(一级)", "下浮绩效点数(其他)",
+            "减少表现奖分数(其他)"
     ));
 
     private static final Set<String> TEXT_HEADERS = new HashSet<>(Arrays.asList(
-            "工号", "姓名", "部门", "计资方式", "福利假天数备注", "员工本人签字确认"
+            "工号", "姓名", "部门", "计资方式", "福利假天数备注", "员工本人签字确认", "说明"
     ));
 
     private static final String[] PENALTY_HEADERS = {
@@ -99,12 +110,19 @@ public class AttendanceExcelService {
                         throw new BusinessException("工号" + employeeNo + "，" + required + "为空，请修改后重新上传");
                     }
                 }
+                checkLength(data, "计资方式", 100, employeeNo);
+                checkLength(data, "福利假天数备注", 100, employeeNo);
+                checkLength(data, "说明", 2000, employeeNo);
                 for (Map.Entry<String, String> entry : data.entrySet()) {
                     if (TEXT_HEADERS.contains(entry.getKey()) || !StringUtils.hasText(entry.getValue())) {
                         continue;
                     }
                     try {
-                        new BigDecimal(entry.getValue().replace(",", ""));
+                        BigDecimal value = new BigDecimal(entry.getValue().replace(",", ""));
+                        if (value.stripTrailingZeros().scale() > 6) {
+                            throw new BusinessException("工号" + employeeNo + "，" + entry.getKey()
+                                    + "最多支持小数点后6位，请修改后重新上传");
+                        }
                     } catch (NumberFormatException ex) {
                         throw new BusinessException("工号" + employeeNo + "，" + entry.getKey() + "格式错误，请修改后重新上传");
                     }
@@ -151,10 +169,8 @@ public class AttendanceExcelService {
                     throw new BusinessException("第" + (r + 1) + "行工号或姓名为空");
                 }
                 String importType = data.getOrDefault("导入方式", "新增");
+                validatePenaltyData(data, employeeNo);
                 String code = data.get("编号");
-                if ("修改".equals(importType) && !StringUtils.hasText(code)) {
-                    throw new BusinessException("工号" + employeeNo + "，导入方式为修改时编号不能为空");
-                }
                 PenaltyRow rowData = new PenaltyRow();
                 rowData.setRowNum(r + 1);
                 rowData.setImportType(("修改".equals(importType) || "MODIFY".equalsIgnoreCase(importType)) ? "MODIFY" : "NEW");
@@ -339,6 +355,95 @@ public class AttendanceExcelService {
                 .replace("*", "");
     }
 
+
+    private void validatePenaltyData(Map<String, String> data, String employeeNo) {
+        String importType = data.get("导入方式");
+        if (!StringUtils.hasText(importType)) {
+            throw new BusinessException("工号" + employeeNo + "，导入方式为空，请修改后重新上传");
+        }
+        boolean modify = "修改".equals(importType) || "MODIFY".equalsIgnoreCase(importType);
+        String code = data.get("编号");
+        if (modify && !StringUtils.hasText(code)) {
+            throw new BusinessException("工号" + employeeNo + "，导入方式为修改时编号不能为空");
+        }
+        if (!modify && StringUtils.hasText(code)) {
+            throw new BusinessException("工号" + employeeNo + "，导入方式为新增时编号必须为空");
+        }
+        validateDate(data.get("开单日期"), "开单日期", "yyyy-MM-dd", employeeNo);
+        validateMonth(data.get("执行月份"), employeeNo);
+        checkPenaltyLength(data, "惩罚种类", 50, employeeNo);
+        checkPenaltyLength(data, "处罚等级", 50, employeeNo);
+        checkPenaltyLength(data, "处罚层级", 50, employeeNo);
+        checkPenaltyLength(data, "文件制度", 50, employeeNo);
+        checkPenaltyLength(data, "条例条款", 50, employeeNo);
+        checkPenaltyLength(data, "原因", 50, employeeNo);
+        checkPenaltyLength(data, "建议事业部", 50, employeeNo);
+        checkPenaltyLength(data, "建议人", 50, employeeNo);
+        checkPenaltyRequired(data, "处罚等级", employeeNo);
+        checkPenaltyRequired(data, "文件制度", employeeNo);
+        checkPenaltyRequired(data, "条例条款", employeeNo);
+        checkPenaltyRequired(data, "原因", employeeNo);
+        checkPenaltyDecimal(data, "无绩效奖或表现奖月数", employeeNo);
+        checkPenaltyDecimal(data, "绩效奖点数", employeeNo);
+    }
+
+    private void validateDate(String value, String label, String pattern, String employeeNo) {
+        if (!StringUtils.hasText(value)) {
+            return;
+        }
+        try {
+            LocalDate.parse(value, DateTimeFormatter.ofPattern(pattern));
+        } catch (Exception ex) {
+            throw new BusinessException("工号" + employeeNo + "，" + label + "格式应为" + pattern);
+        }
+    }
+
+    private void validateMonth(String value, String employeeNo) {
+        if (!StringUtils.hasText(value)) {
+            return;
+        }
+        try {
+            YearMonth.parse(value);
+        } catch (Exception ex) {
+            throw new BusinessException("工号" + employeeNo + "，执行月份格式应为YYYY-MM");
+        }
+    }
+
+    private void checkPenaltyLength(Map<String, String> data, String key, int max, String employeeNo) {
+        String value = data.get(key);
+        if (value != null && value.length() > max) {
+            throw new BusinessException("工号" + employeeNo + "，" + key + "最多支持" + max + "个字符");
+        }
+    }
+
+    private void checkPenaltyRequired(Map<String, String> data, String key, String employeeNo) {
+        if (!StringUtils.hasText(data.get(key))) {
+            throw new BusinessException("工号" + employeeNo + "，" + key + "为空，请修改后重新上传");
+        }
+    }
+
+    private void checkPenaltyDecimal(Map<String, String> data, String key, String employeeNo) {
+        String value = data.get(key);
+        if (!StringUtils.hasText(value)) {
+            return;
+        }
+        try {
+            BigDecimal decimal = new BigDecimal(value.replace(",", ""));
+            if (decimal.stripTrailingZeros().scale() > 6) {
+                throw new BusinessException("工号" + employeeNo + "，" + key + "最多支持小数点后6位");
+            }
+        } catch (NumberFormatException ex) {
+            throw new BusinessException("工号" + employeeNo + "，" + key + "格式错误");
+        }
+    }
+
+    private void checkLength(Map<String, String> data, String key, int max, String employeeNo) {
+        String value = data.get(key);
+        if (value != null && value.length() > max) {
+            throw new BusinessException("工号" + employeeNo + "，" + key + "最多支持" + max + "个字符，请修改后重新上传");
+        }
+    }
+
     private String canonicalAttendance(String header) {
         if (header.contains("工号")) return "工号";
         if (header.contains("姓名")) return "姓名";
@@ -375,6 +480,7 @@ public class AttendanceExcelService {
         if (header.contains("下浮绩效点数")) return "下浮绩效点数";
         if (header.contains("减少表现奖分数")) return "减少表现奖分数";
         if (header.contains("签字确认")) return "员工本人签字确认";
+        if (header.contains("说明")) return "说明";
         return null;
     }
 

@@ -11,6 +11,8 @@ export default function AdminNotices({ tab }) {
   const [noticeSize, setNoticeSize] = useState(10);
   const [noticeTotal, setNoticeTotal] = useState(0);
   const [templates, setTemplates] = useState([]);
+  const [templateKeyword, setTemplateKeyword] = useState('');
+  const [templateStatus, setTemplateStatus] = useState('ALL');
   const [departments, setDepartments] = useState([]);
   const [users, setUsers] = useState([]);
   const [wecom, setWecom] = useState(null);
@@ -27,8 +29,8 @@ export default function AdminNotices({ tab }) {
     setNoticeTotal(data.total || 0);
   };
 
-  const loadTemplates = async () => {
-    setTemplates(await api.get('/admin/templates'));
+  const loadTemplates = async (keyword = templateKeyword, status = templateStatus) => {
+    setTemplates(await api.get('/admin/templates', { params: { keyword, status } }));
   };
 
   const loadOptions = async () => {
@@ -88,6 +90,19 @@ export default function AdminNotices({ tab }) {
     await api.delete(`/admin/templates/${id}`);
     message.success('模板已停用');
     loadTemplates();
+  };
+
+  const restoreTemplate = async (id) => {
+    await api.post(`/admin/templates/${id}/restore`);
+    message.success('模板已恢复');
+    loadTemplates();
+  };
+
+  const applyTemplate = (id) => {
+    const template = templates.find((item) => item.id === id);
+    if (template) {
+      publishForm.setFieldsValue({ title: template.title, content: template.content });
+    }
   };
 
   const targetOptions = () => {
@@ -155,8 +170,30 @@ export default function AdminNotices({ tab }) {
             label: '通知模板',
             children: (
               <>
-                <Space style={{ marginBottom: 12 }}>
+                <Space wrap style={{ marginBottom: 12 }}>
                   <Button type="primary" onClick={() => openTemplate(null)}>新建模板</Button>
+                  <Input.Search
+                    placeholder="模板标题"
+                    allowClear
+                    onSearch={(value) => {
+                      setTemplateKeyword(value);
+                      loadTemplates(value, templateStatus);
+                    }}
+                    style={{ width: 220 }}
+                  />
+                  <Select
+                    value={templateStatus}
+                    style={{ width: 120 }}
+                    onChange={(value) => {
+                      setTemplateStatus(value);
+                      loadTemplates(templateKeyword, value);
+                    }}
+                    options={[
+                      { value: 'ALL', label: '全部' },
+                      { value: 'ACTIVE', label: '有效' },
+                      { value: 'DISABLED', label: '失效' }
+                    ]}
+                  />
                 </Space>
                 <Table
                   rowKey="id"
@@ -172,7 +209,11 @@ export default function AdminNotices({ tab }) {
                       render: (_, row) => (
                         <Space>
                           <Button size="small" onClick={() => openTemplate(row)}>编辑</Button>
-                          <Button size="small" danger onClick={() => disableTemplate(row.id)}>停用</Button>
+                          {row.status === 'ACTIVE' ? (
+                            <Button size="small" danger onClick={() => disableTemplate(row.id)}>停用</Button>
+                          ) : (
+                            <Button size="small" onClick={() => restoreTemplate(row.id)}>恢复</Button>
+                          )}
                         </Space>
                       )
                     }
@@ -197,11 +238,19 @@ export default function AdminNotices({ tab }) {
           initialValues={{ targetType: 'ALL', saveAsTemplate: false }}
           onFinish={publish}
         >
+          <Form.Item name="templateId" label="通知模板">
+            <Select
+              allowClear
+              placeholder="选择模板后自动带入标题和内容"
+              options={templates.filter((item) => item.status === 'ACTIVE').map((item) => ({ value: item.id, label: item.title }))}
+              onChange={applyTemplate}
+            />
+          </Form.Item>
           <Form.Item name="title" label="标题" rules={[{ required: true, message: '请输入标题' }]}>
-            <Input />
+            <Input maxLength={100} showCount />
           </Form.Item>
           <Form.Item name="content" label="内容" rules={[{ required: true, message: '请输入内容' }]}>
-            <Input.TextArea rows={6} />
+            <Input.TextArea rows={6} maxLength={10000} showCount />
           </Form.Item>
           <Form.Item name="targetType" label="发送范围" rules={[{ required: true }]}>
             <Select options={[
@@ -230,10 +279,10 @@ export default function AdminNotices({ tab }) {
       >
         <Form form={templateForm} layout="vertical" onFinish={saveTemplate}>
           <Form.Item name="title" label="标题" rules={[{ required: true }]}>
-            <Input />
+            <Input maxLength={200} showCount />
           </Form.Item>
           <Form.Item name="content" label="内容" rules={[{ required: true }]}>
-            <Input.TextArea rows={6} />
+            <Input.TextArea rows={6} maxLength={10000} showCount />
           </Form.Item>
           <Button type="primary" htmlType="submit" block>保存</Button>
         </Form>

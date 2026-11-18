@@ -40,7 +40,9 @@ public class AuthController {
                 (java.util.Set<String>) result.get("permissions"),
                 Boolean.TRUE.equals(result.get("mustChangePassword"))
         );
-        request.getSession(true).setAttribute(SessionKeys.LOGIN_USER, loginUser);
+        HttpSession session = request.getSession(true);
+        request.changeSessionId();
+        session.setAttribute(SessionKeys.LOGIN_USER, loginUser);
         return ApiResponse.ok(result);
     }
 

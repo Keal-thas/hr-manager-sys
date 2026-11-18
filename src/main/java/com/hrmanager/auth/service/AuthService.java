@@ -101,7 +101,21 @@ public class AuthService {
         if (user == null) {
             throw new BusinessException(401, "用户不存在");
         }
+        LocalDateTime now = LocalDateTime.now();
+        if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(now)) {
+            throw new BusinessException("密码错误5次，请稍后再试");
+        }
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            int attempts = user.getFailedAttempts() == null ? 0 : user.getFailedAttempts();
+            attempts++;
+            if (attempts >= 5) {
+                user.setFailedAttempts(0);
+                user.setLockedUntil(now.plusMinutes(15));
+                userMapper.updateById(user);
+                throw new BusinessException("密码错误5次，请稍后再试");
+            }
+            user.setFailedAttempts(attempts);
+            userMapper.updateById(user);
             throw new BusinessException("原密码错误，请重新录入");
         }
         validatePassword(newPassword);

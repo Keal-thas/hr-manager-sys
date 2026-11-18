@@ -84,11 +84,11 @@ POST /api/auth/change-password
 GET  /api/dashboard
 GET  /api/menus
 
-GET  /api/my/attendance/current
+GET  /api/my/attendance/current?year=&month=
 GET  /api/my/attendance/history?page=1&size=10
 GET  /api/my/attendance/{batchId}
 POST /api/my/attendance/{batchId}/confirm
-GET  /api/my/messages?page=1&size=10&type=&unreadOnly=
+GET  /api/my/messages?page=1&size=10&type=&status=&keyword=&unreadOnly=
 GET  /api/my/messages/{id}
 GET  /api/my/messages/unread-count
 POST /api/my/messages/{id}/read
@@ -110,12 +110,13 @@ POST /api/my/attendance/1/confirm
 ## 4. 考勤管理
 
 ```text
-GET  /api/admin/attendance/batches?page=1&size=10
+GET  /api/admin/attendance/batches?page=1&size=10&year=&month=
 GET  /api/admin/attendance/batches/{id}
 GET  /api/admin/attendance/latest
 POST /api/admin/attendance/upload
 GET  /api/admin/attendance/batches/{id}/records?page=1&size=10&keyword=&status=
 GET  /api/admin/attendance/records/{id}
+POST /api/admin/attendance/records/{id}/offline-signature
 POST /api/admin/attendance/batches/{id}/remind?type=ATTENDANCE
 POST /api/admin/attendance/batches/{id}/penalties/upload
 GET  /api/admin/attendance/batches/{id}/penalties?page=1&size=10&keyword=
@@ -153,10 +154,11 @@ ABNORMAL    未阅读且有处罚记录的员工
 GET  /api/admin/notices?page=1&size=10
 GET  /api/admin/notices/{id}
 POST /api/admin/notices
-GET  /api/admin/templates
+GET  /api/admin/templates?status=&keyword=
 POST /api/admin/templates
 PUT  /api/admin/templates/{id}
 DELETE /api/admin/templates/{id}
+POST /api/admin/templates/{id}/restore
 ```
 
 发布:

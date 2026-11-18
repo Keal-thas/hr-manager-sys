@@ -47,8 +47,14 @@ public class NoticeService {
         if (!StringUtils.hasText(title)) {
             throw new BusinessException("通知标题不能为空");
         }
+        if (title.length() > 100) {
+            throw new BusinessException("通知标题不能超过100个字符");
+        }
         if (!StringUtils.hasText(content)) {
             throw new BusinessException("通知内容不能为空");
+        }
+        if (content.length() > 10000) {
+            throw new BusinessException("通知内容不能超过10000个字符");
         }
         List<SysUser> users = resolveUsers(targetType, targetIds);
         if (users.isEmpty()) {
@@ -122,17 +128,23 @@ public class NoticeService {
         return notice;
     }
 
-    public List<NoticeTemplate> templates() {
-        return templateMapper.selectList(Wrappers.<NoticeTemplate>lambdaQuery()
-                .eq(NoticeTemplate::getStatus, "ACTIVE")
-                .orderByDesc(NoticeTemplate::getCreatedAt));
+    public List<NoticeTemplate> templates(String status, String keyword) {
+        LambdaQueryWrapper<NoticeTemplate> wrapper = Wrappers.<NoticeTemplate>lambdaQuery()
+                .orderByDesc(NoticeTemplate::getCreatedAt);
+        if (!StringUtils.hasText(status)) {
+            wrapper.eq(NoticeTemplate::getStatus, "ACTIVE");
+        } else if (!"ALL".equalsIgnoreCase(status)) {
+            wrapper.eq(NoticeTemplate::getStatus, status.toUpperCase());
+        }
+        if (StringUtils.hasText(keyword)) {
+            wrapper.like(NoticeTemplate::getTitle, keyword.trim());
+        }
+        return templateMapper.selectList(wrapper);
     }
 
     @Transactional
     public NoticeTemplate createTemplate(NoticeTemplate body) {
-        if (!StringUtils.hasText(body.getTitle()) || !StringUtils.hasText(body.getContent())) {
-            throw new BusinessException("模板标题和内容不能为空");
-        }
+        validateTemplate(body);
         body.setStatus("ACTIVE");
         body.setCreatedAt(LocalDateTime.now());
         templateMapper.insert(body);
@@ -144,6 +156,12 @@ public class NoticeService {
         NoticeTemplate template = templateMapper.selectById(id);
         if (template == null) {
             throw new BusinessException("模板不存在");
+        }
+        if (StringUtils.hasText(body.getTitle()) && body.getTitle().length() > 200) {
+            throw new BusinessException("模板标题不能超过200个字符");
+        }
+        if (StringUtils.hasText(body.getContent()) && body.getContent().length() > 10000) {
+            throw new BusinessException("模板内容不能超过10000个字符");
         }
         if (StringUtils.hasText(body.getTitle())) {
             template.setTitle(body.getTitle());
@@ -163,6 +181,28 @@ public class NoticeService {
         }
         template.setStatus("DISABLED");
         templateMapper.updateById(template);
+    }
+
+    @Transactional
+    public void restoreTemplate(Long id) {
+        NoticeTemplate template = templateMapper.selectById(id);
+        if (template == null) {
+            throw new BusinessException("模板不存在");
+        }
+        template.setStatus("ACTIVE");
+        templateMapper.updateById(template);
+    }
+
+    private void validateTemplate(NoticeTemplate body) {
+        if (!StringUtils.hasText(body.getTitle()) || !StringUtils.hasText(body.getContent())) {
+            throw new BusinessException("模板标题和内容不能为空");
+        }
+        if (body.getTitle().length() > 200) {
+            throw new BusinessException("模板标题不能超过200个字符");
+        }
+        if (body.getContent().length() > 10000) {
+            throw new BusinessException("模板内容不能超过10000个字符");
+        }
     }
 
     private List<Long> parseIds(String value) {

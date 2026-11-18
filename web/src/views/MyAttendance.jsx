@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  Alert, Button, Card, Checkbox, Descriptions, Empty, Modal, Space, Table, Tag, message
+  Alert, Button, Card, Checkbox, Descriptions, Empty, InputNumber, Modal, Select, Space, Table, Tag, message
 } from 'antd';
 import api from '../api';
 
@@ -16,7 +16,11 @@ const statusText = {
   CONFIRMED: '已确认'
 };
 
+const now = new Date();
+
 export default function MyAttendance() {
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1;
   const [current, setCurrent] = useState(null);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,11 +31,11 @@ export default function MyAttendance() {
   const canvasRef = useRef(null);
   const drawing = useRef(false);
 
-  const load = async () => {
+  const load = async (y = year, m = month) => {
     setLoading(true);
     try {
       const [cur, hist] = await Promise.all([
-        api.get('/my/attendance/current'),
+        api.get('/my/attendance/current', { params: { year: y, month: m } }),
         api.get('/my/attendance/history?page=1&size=10')
       ]);
       setCurrent(cur);
@@ -42,14 +46,18 @@ export default function MyAttendance() {
   };
 
   useEffect(() => {
-    load();
+    load(year, month);
   }, []);
 
   const dataRows = current?.data
     ? Object.entries(current.data).map(([key, value]) => ({ key, field: key, value }))
     : [];
 
-  const openSign = () => {
+  const openSign = async () => {
+    if (current && current.status !== 'CONFIRMED') {
+      const detail = await api.get(`/my/attendance/${current.batchId}`);
+      setCurrent(detail);
+    }
     setAgreed(false);
     setHasInk(false);
     setOpen(true);
@@ -123,12 +131,30 @@ export default function MyAttendance() {
     }
   };
 
-  if (!loading && !current) {
-    return <Empty description="暂无最新考勤" />;
-  }
+  const penaltyRows = (current?.penalties || []).map((item) => ({
+    ...item,
+    ...(item.data || {}),
+    key: item.id
+  }));
 
   return (
     <div data-testid="my-attendance-page">
+      <Card size="small" style={{ marginBottom: 16 }}>
+        <Space wrap>
+          <span>考勤年份</span>
+          <InputNumber value={year} disabled style={{ width: 100 }} />
+          <span>考勤月份</span>
+          <Select
+            value={month}
+            disabled
+            style={{ width: 100 }}
+            options={Array.from({ length: 12 }, (_, i) => ({ value: i + 1, label: `${i + 1} 月` }))}
+          />
+          <Button type="primary" onClick={() => load(year, month)} data-testid="attendance-query">
+            查询
+          </Button>
+        </Space>
+      </Card>
       {current ? (
         <Card
           title={`${current.batchYear} 年 ${current.batchMonth} 月考勤`}
@@ -157,8 +183,31 @@ export default function MyAttendance() {
               { title: '值', dataIndex: 'value' }
             ]}
           />
+          {penaltyRows.length ? (
+            <>
+              <div className="muted" style={{ marginTop: 16, marginBottom: 8 }}>处罚明细</div>
+              <Table
+                size="small"
+                pagination={false}
+                dataSource={penaltyRows}
+                scroll={{ x: 1200 }}
+                columns={[
+                  { title: '编号', dataIndex: 'code', width: 150 },
+                  { title: '开单日期', dataIndex: '开单日期', width: 120 },
+                  { title: '执行月份', dataIndex: '执行月份', width: 110 },
+                  { title: '惩罚种类', dataIndex: '惩罚种类' },
+                  { title: '处罚等级', dataIndex: '处罚等级' },
+                  { title: '处罚层级', dataIndex: '处罚层级' },
+                  { title: '原因', dataIndex: '原因' },
+                  { title: '绩效奖点数', dataIndex: '绩效奖点数', width: 120 }
+                ]}
+              />
+            </>
+          ) : null}
         </Card>
-      ) : null}
+      ) : (
+        <Empty description="暂无可查询考勤" />
+      )}
 
       <Card title="历史考勤" style={{ marginTop: 16 }}>
         <Table

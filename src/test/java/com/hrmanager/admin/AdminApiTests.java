@@ -67,7 +67,7 @@ class AdminApiTests extends AbstractApiTest {
                 .andExpect(jsonPath("$.data.mustChangePassword").value(true))
                 .andExpect(jsonPath("$.data.wecomUserId").value("TestUser20001"));
 
-        MockHttpSession newUser = login("20001", "Init1234");
+        MockHttpSession newUser = login("20001", "bydpcic@123");
 
         mockMvc.perform(get("/api/dashboard").session(newUser))
                 .andExpect(status().isForbidden())
@@ -76,7 +76,7 @@ class AdminApiTests extends AbstractApiTest {
         mockMvc.perform(post("/api/auth/change-password")
                         .session(newUser)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"oldPassword\":\"Init1234\",\"newPassword\":\"NewPass123\"}"))
+                        .content("{\"oldPassword\":\"bydpcic@123\",\"newPassword\":\"NewPass123\"}"))
                 .andExpect(status().isOk());
 
         mockMvc.perform(get("/api/dashboard").session(newUser))

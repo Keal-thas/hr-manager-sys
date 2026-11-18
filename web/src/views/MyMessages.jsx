@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Card, Modal, Space, Table, Tag, message } from 'antd';
+import { Button, Card, Input, Modal, Select, Space, Table, Tag, message } from 'antd';
 import api from '../api';
 
 const typeText = {
@@ -22,11 +22,16 @@ export default function MyMessages() {
   const [size, setSize] = useState(10);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState(null);
+  const [keyword, setKeyword] = useState('');
+  const [status, setStatus] = useState('');
+  const [query, setQuery] = useState({ keyword: '', status: '' });
 
   const load = async () => {
     setLoading(true);
     try {
-      const result = await api.get('/my/messages', { params: { page, size } });
+      const result = await api.get('/my/messages', {
+        params: { page, size, keyword: query.keyword, status: query.status }
+      });
       setData(result);
     } finally {
       setLoading(false);
@@ -35,7 +40,7 @@ export default function MyMessages() {
 
   useEffect(() => {
     load();
-  }, [page, size]);
+  }, [page, size, query]);
 
   const open = async (record) => {
     setSelected(record);
@@ -57,6 +62,50 @@ export default function MyMessages() {
       title="消息通知"
       extra={<Button onClick={readAll}>全部已读</Button>}
     >
+      <Space wrap style={{ marginBottom: 12 }}>
+        <Input.Search
+          placeholder="标题检索"
+          allowClear
+          value={keyword}
+          onChange={(e) => setKeyword(e.target.value)}
+          onSearch={(value) => {
+            setPage(1);
+            setQuery({ keyword: value, status });
+          }}
+          style={{ width: 260 }}
+          data-testid="message-keyword"
+        />
+        <Select
+          value={status}
+          style={{ width: 130 }}
+          onChange={(value) => setStatus(value)}
+          options={[
+            { value: '', label: '全部' },
+            { value: 'UNREAD', label: '未阅读' },
+            { value: 'READ', label: '已阅读' }
+          ]}
+          data-testid="message-status"
+        />
+        <Button
+          type="primary"
+          onClick={() => {
+            setPage(1);
+            setQuery({ keyword, status });
+          }}
+        >
+          查询
+        </Button>
+        <Button
+          onClick={() => {
+            setKeyword('');
+            setStatus('');
+            setPage(1);
+            setQuery({ keyword: '', status: '' });
+          }}
+        >
+          重置
+        </Button>
+      </Space>
       <Table
         rowKey="id"
         loading={loading}
@@ -73,20 +122,39 @@ export default function MyMessages() {
           }
         }}
         columns={[
+          { title: '序号', width: 70, render: (_, __, index) => (page - 1) * size + index + 1 },
+          {
+            title: '标题',
+            dataIndex: 'title',
+            render: (v, row) => <span style={{ fontWeight: row.readFlag ? 400 : 600 }}>{v}</span>
+          },
           {
             title: '类型',
             dataIndex: 'type',
-            width: 130,
+            width: 120,
             render: (v) => <Tag color={typeColor[v] || 'default'}>{typeText[v] || v}</Tag>
           },
-          { title: '标题', dataIndex: 'title' },
+          {
+            title: '发布日期',
+            dataIndex: 'createdAt',
+            width: 130,
+            render: (v) => (v ? String(v).slice(0, 10) : '-')
+          },
           {
             title: '状态',
             dataIndex: 'readFlag',
             width: 100,
             render: (v) => (v ? <Tag>已读</Tag> : <Tag color="red">未读</Tag>)
           },
-          { title: '时间', dataIndex: 'createdAt', width: 180 }
+          {
+            title: '操作',
+            width: 120,
+            render: (_, row) => (
+              <Button size="small" type="link" onClick={(e) => { e.stopPropagation(); open(row); }}>
+                详情/阅读
+              </Button>
+            )
+          }
         ]}
       />
       <Modal

@@ -121,11 +121,13 @@ public class UserService {
         if (roleMapper.selectById(body.getRoleId()) == null) {
             throw new BusinessException("角色不存在");
         }
+        validatePhone(body.getPhone());
+        validateEmail(body.getEmail());
         Long count = userMapper.selectCount(Wrappers.<SysUser>lambdaQuery().eq(SysUser::getEmployeeNo, body.getEmployeeNo()));
         if (count > 0) {
             throw new BusinessException("员工工号已存在，请修改后保存");
         }
-        String rawPassword = StringUtils.hasText(body.getPassword()) ? body.getPassword() : "Init1234";
+        String rawPassword = StringUtils.hasText(body.getPassword()) ? body.getPassword() : "bydpcic@123";
         String encoded = passwordEncoder.encode(rawPassword);
         body.setPassword(encoded);
         body.setInitialPassword(encoded);
@@ -167,6 +169,8 @@ public class UserService {
             }
             user.setRoleId(body.getRoleId());
         }
+        validatePhone(body.getPhone());
+        validateEmail(body.getEmail());
         user.setPhone(body.getPhone());
         user.setEmail(body.getEmail());
         user.setWecomUserId(body.getWecomUserId());
@@ -181,7 +185,7 @@ public class UserService {
     @Transactional
     public void resetPassword(Long id, String newPassword) {
         SysUser user = get(id);
-        String raw = StringUtils.hasText(newPassword) ? newPassword : "Init1234";
+        String raw = StringUtils.hasText(newPassword) ? newPassword : "bydpcic@123";
         String encoded = passwordEncoder.encode(raw);
         user.setPassword(encoded);
         user.setInitialPassword(encoded);
@@ -205,6 +209,8 @@ public class UserService {
 
     @Transactional
     public void updateProfile(Long id, String phone, String email) {
+        validatePhone(phone);
+        validateEmail(email);
         SysUser user = get(id);
         user.setPhone(phone);
         user.setEmail(email);
@@ -220,6 +226,18 @@ public class UserService {
         return userMapper.selectOne(Wrappers.<SysUser>lambdaQuery()
                 .eq(SysUser::getEmployeeNo, employeeNo)
                 .last("limit 1"));
+    }
+
+    private void validatePhone(String phone) {
+        if (StringUtils.hasText(phone) && !phone.matches("\\d{11}")) {
+            throw new BusinessException("手机号必须为11位数字");
+        }
+    }
+
+    private void validateEmail(String email) {
+        if (StringUtils.hasText(email) && !email.matches("^[^@\\s]+@bydpcic\\.com$")) {
+            throw new BusinessException("邮箱必须为@bydpcic.com");
+        }
     }
 
     private void validateEmployeeNo(String employeeNo) {

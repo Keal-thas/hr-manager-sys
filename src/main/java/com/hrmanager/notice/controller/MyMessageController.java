@@ -29,9 +29,12 @@ public class MyMessageController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String type,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Boolean unreadOnly,
             HttpServletRequest request) {
-        return ApiResponse.ok(messageService.page(SessionUtil.current(request).getId(), page, size, type, unreadOnly));
+        return ApiResponse.ok(messageService.page(SessionUtil.current(request).getId(), page, size,
+                type, status, keyword, unreadOnly));
     }
 
     @GetMapping("/{id}")

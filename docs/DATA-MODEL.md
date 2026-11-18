@@ -135,7 +135,7 @@ admin-user
 规则:
 
 - 服务层保证同一 `batch_year + batch_month` 只有一条有效批次.
-- `latest=true` 的批次用于员工"我的考勤"和提醒按钮.
+- `latest=true` 的批次是 `batch_year + batch_month` 最大的一期, 用于员工"我的考勤"和提醒按钮.
 - 上传月份不能晚于当前月份.
 
 ## 7. attendance_record
@@ -167,7 +167,7 @@ admin-user
 
 | 分组 | 字段 |
 |---|---|
-| 基础 | 工号, 姓名, 部门, 计资方式 |
+| 基础 | 工号, 姓名, 部门, 计资方式, 说明 |
 | 出勤 | 工作日缺勤天数, 加点小时数, 加班小时数, 法定节假日加班小时 |
 | 计件 | 计资类型变化/计件时应出勤天数 |
 | 出勤统计 | 实际出勤天数, 高温天数, 应出勤天数, 已调休天数, 本月年休天数, 当月加班调休小时数 |
@@ -189,7 +189,7 @@ admin-user
 | employee_no | VARCHAR(32) | 是 | IDX | 工号 |
 | name | VARCHAR(100) | 是 | | 姓名 |
 | department_name | VARCHAR(100) | 是 | | 部门 |
-| data_json | TEXT | 是 | | 完整异常字段 |
+| data_json | TEXT | 是 | | 导入时识别到的非空字段 |
 | created_at | TIMESTAMP | 是 | | |
 
 编号规则:
@@ -285,9 +285,9 @@ NOTICE              系统通知
 |---|---|
 | sys_user | department_id, role_id, employee_no unique |
 | sys_department | code unique, parent_id |
-| attendance_batch | batch_year + batch_month |
-| attendance_record | batch_id, user_id |
-| attendance_penalty | batch_id |
+| attendance_batch | batch_year + batch_month unique |
+| attendance_record | batch_id + employee_no unique, user_id |
+| attendance_penalty | batch_id + code unique, batch_id |
 | sys_message | user_id + read_flag |
 
 ## 14. 种子数据

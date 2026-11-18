@@ -46,8 +46,10 @@ public class NoticeAdminController {
     }
 
     @GetMapping("/templates")
-    public ApiResponse<List<NoticeTemplate>> templates() {
-        return ApiResponse.ok(noticeService.templates());
+    public ApiResponse<List<NoticeTemplate>> templates(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String keyword) {
+        return ApiResponse.ok(noticeService.templates(status, keyword));
     }
 
     @PostMapping("/templates")
@@ -63,6 +65,12 @@ public class NoticeAdminController {
     @DeleteMapping("/templates/{id}")
     public ApiResponse<Void> disableTemplate(@PathVariable Long id) {
         noticeService.disableTemplate(id);
+        return ApiResponse.ok();
+    }
+
+    @PostMapping("/templates/{id}/restore")
+    public ApiResponse<Void> restoreTemplate(@PathVariable Long id) {
+        noticeService.restoreTemplate(id);
         return ApiResponse.ok();
     }
 }
