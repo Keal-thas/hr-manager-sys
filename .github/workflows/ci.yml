@@ -29,14 +29,14 @@ jobs:
         run: mvn -B -ntp test
       - name: Upload test reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: surefire-reports
           path: target/surefire-reports
           retention-days: 7
       - name: Upload coverage report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: jacoco-report
           path: target/site/jacoco
@@ -71,7 +71,7 @@ jobs:
             exit 1
           fi
       - name: Upload static assets
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frontend-static
           path: src/main/resources/static
@@ -106,7 +106,7 @@ jobs:
         run: npm run e2e
       - name: Upload Playwright report
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report
           path: web/playwright-report
@@ -132,7 +132,7 @@ jobs:
       - name: Package
         run: mvn -B -ntp -DskipTests package
       - name: Upload application jar
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: hr-manager-sys-jar
           path: target/hr-manager-sys-*.jar
