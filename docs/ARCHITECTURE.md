@@ -282,7 +282,7 @@ Flyway 启动时执行 db/migration/mysql
 
 ## 10. 非目标
 
-- 不做企业微信 SSO 和电子签名
+- 本期不做企微工作台员工自助、企微身份登录、电子签名和签字回溯, 缺口见 [README TODO](../README.md#todo-未实现的需求)
 - 不做审批流
 - 不做 OCR
 - 不做复杂报表
