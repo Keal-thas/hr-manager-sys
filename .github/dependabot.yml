@@ -8,6 +8,10 @@ updates:
     labels:
       - dependencies
       - backend
+    ignore:
+      - dependency-name: org.apache.poi:poi-ooxml
+        update-types:
+          - version-update:semver-major
 
   - package-ecosystem: npm
     directory: /web
