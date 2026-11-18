@@ -20,7 +20,7 @@
     <properties>
         <java.version>1.8</java.version>
         <mybatis-plus.version>3.5.7</mybatis-plus.version>
-        <poi.version>5.2.5</poi.version>
+        <poi.version>6.0.0</poi.version>
         <h2.version>2.1.210</h2.version>
         <testcontainers.version>1.21.4</testcontainers.version>
     </properties>
