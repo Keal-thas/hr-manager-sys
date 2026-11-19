@@ -17,6 +17,6 @@
 13. [UNIFIED-MYSQL.md](UNIFIED-MYSQL.md): 统一 MySQL 方案, 测试和环境的数据库拓扑
 14. [CODING-RULES.md](CODING-RULES.md): 编码约束
 15. [RELEASE.md](RELEASE.md): 私有源码和公有压缩包流程
-16. [SESSION-NOTES.md](../SESSION-NOTES.md): 本次交付记录
+16. [SESSION-NOTES.md](../SESSION-NOTES.md): 交付时间线
 17. [AGENTS.md](../AGENTS.md): AI agent 必读规则
 18. [.github/workflows](../.github/workflows): CI, E2E 和 Release 工作流

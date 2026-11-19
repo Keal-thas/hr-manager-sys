@@ -247,7 +247,7 @@ ops/monitoring/       Prometheus, Grafana, 告警规则
 - [docs/RELEASE.md](docs/RELEASE.md): 私有源码和公有压缩包流程
 - [WORKFLOW.md](WORKFLOW.md): 强制开发流程, hook, CI, 数据库和提交规则
 - [AGENTS.md](AGENTS.md): AI agent 必读规则
-- [SESSION-NOTES.md](SESSION-NOTES.md): 本次交付, 设计取舍, 冒烟结果和后续事项
+- [SESSION-NOTES.md](SESSION-NOTES.md): 交付时间线, 已知缺口和发布信息
 
 首次设置:
 
