@@ -5,7 +5,7 @@
 1. [README.md](../README.md): 项目简介, 启动, 默认账号
 2. [WORKFLOW.md](../WORKFLOW.md): 强制开发流程和约束
 3. [FIELD-CONTRACT.md](FIELD-CONTRACT.md): 字段契约, 标签和字段字典
-4. [DATA-SCOPE.md](DATA-SCOPE.md): 考勤和通知的业务数据模型
+4. [DATA-SCOPE.md](DATA-SCOPE.md): 业务目标, 关键需求, 14 个业务模型和待业务确认项
 5. [ARCHITECTURE.md](ARCHITECTURE.md): 模块, 登录/考勤/通知流程
 6. [TESTING.md](TESTING.md): 测试策略, E2E 和冒烟清单
 7. [FRONTEND.md](FRONTEND.md): 前端结构, 设计系统, 测试选择器
