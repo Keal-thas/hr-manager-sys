@@ -12,6 +12,9 @@ updates:
       - dependency-name: org.apache.poi:poi-ooxml
         update-types:
           - version-update:semver-major
+      - dependency-name: org.springframework.boot:spring-boot-starter-parent
+        update-types:
+          - version-update:semver-major
 
   - package-ecosystem: npm
     directory: /web
