@@ -4,7 +4,7 @@
 
 ## 1. DOCX 工具 + HR MVP
 
-- DOCX 转 Markdown: pandoc 转 AST, panflute 修正, olefile + openpyxl 处理 OLE 附件, 输出 `document.md`, 分节, 图片和 Excel. 规则见 `.local/export-pandoc/conversion-guide.md`.
+- DOCX 转 Markdown: pandoc 转 AST, panflute 修正, olefile + openpyxl 处理 OLE 附件, 输出 `document.md`, 分节, 图片和 Excel. 规则见 `tools/export-pandoc/conversion-guide.md`.
 - 可运行 MVP: 登录, 我的考勤 (手写签名确认), 消息通知, 个人中心, 考勤管理 (Excel 上传/提醒/异常/导出), 通知和模板, 部门/角色/用户.
 - 私有源码仓库 + 公有 Release 仓库 (密码保护压缩包).
 

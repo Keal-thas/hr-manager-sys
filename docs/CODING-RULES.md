@@ -37,4 +37,4 @@
 
 ## DOCX 工具
 
-- 位于 `.local/export-pandoc/`, 不提交原始 docx.
+- 位于 `tools/export-pandoc/`, 不提交原始 docx.

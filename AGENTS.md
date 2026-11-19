@@ -129,7 +129,7 @@ The Flyway migrations are the schema source of truth. Keep `docs/DATA-SCOPE.md` 
 
 ## DOCX conversion tooling
 
-- Location: `.local/export-pandoc/`.
+- Location: `tools/export-pandoc/`.
 - If conversion rules change, update `conversion-guide.md` and rerun the converter.
 - Do not add the original docx to git.
 - The public release archive is maintained manually. Never put its password in the repository.

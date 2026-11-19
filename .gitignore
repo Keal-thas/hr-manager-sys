@@ -11,3 +11,5 @@ src/main/resources/static/
 web/test-results/
 web/playwright-report/
 .local/
+tools/export-pandoc/out/
+tools/export-pandoc/.build/

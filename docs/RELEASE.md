@@ -74,7 +74,7 @@ git push origin v1.0.0
 - `data/`
 - `target/`
 - `web/node_modules/`
-- `.local/export-pandoc/out` (除非明确需要)
+- `tools/export-pandoc/out` (除非明确需要)
 - 密码文件
 
 ## 5. 加密
