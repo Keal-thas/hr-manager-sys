@@ -1,6 +1,8 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
+    druid:
+      exception-sorter: com.hrmanager.config.LenientMySqlExceptionSorter
   flyway:
     enabled: true
     locations: classpath:db/migration/mysql
