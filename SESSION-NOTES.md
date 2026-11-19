@@ -668,7 +668,6 @@ AGENTS.md
 WORKFLOW.md
 docs/README.md
 docs/ARCHITECTURE.md
-docs/API.md
 docs/TESTING.md
 docs/CODING-RULES.md
 .github/workflows/ci.yml
