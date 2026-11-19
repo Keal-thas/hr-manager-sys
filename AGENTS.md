@@ -18,17 +18,15 @@ This file is mandatory for AI agents working in this repository.
 
 1. `README.md`
 2. `WORKFLOW.md`
-3. `docs/DATA-MODEL.md`
-4. `docs/FIELD-CONTRACT.md`
-5. `docs/DATA-SCOPE.md`
-6. `docs/ARCHITECTURE.md`
-7. `docs/API.md`
-8. `docs/TESTING.md`
-9. `docs/FRONTEND.md`
-10. `docs/MONITORING.md`
-11. `docs/WECOM.md`
-12. `docs/AGENT-WORKFLOW.md`
-13. `SESSION-NOTES.md`
+3. `docs/FIELD-CONTRACT.md`
+4. `docs/DATA-SCOPE.md`
+5. `docs/ARCHITECTURE.md`
+6. `docs/TESTING.md`
+7. `docs/FRONTEND.md`
+8. `docs/MONITORING.md`
+9. `docs/WECOM.md`
+10. `docs/AGENT-WORKFLOW.md`
+11. `SESSION-NOTES.md`
 
 ## Stack constraints
 
@@ -101,11 +99,7 @@ Then update:
 
 Keep H2 and MySQL migrations consistent. Never edit an applied migration.
 
-Always update:
-
-- `docs/DATA-MODEL.md` for table or enum changes
-- `docs/API.md` for endpoint changes
-- `docs/ARCHITECTURE.md` for module or flow changes
+The Flyway migrations are the schema source of truth. Keep `docs/DATA-SCOPE.md` in sync for business-model changes, and `docs/ARCHITECTURE.md` for module or flow changes.
 
 ## Frontend
 

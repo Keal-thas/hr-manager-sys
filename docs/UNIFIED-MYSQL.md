@@ -145,7 +145,6 @@ SELECT COUNT(*) FROM mysql.time_zone_name;
 | `README.md` | 技术栈, 启动方式, 测试说明 |
 | `WORKFLOW.md`, `AGENTS.md` | 环境要求和迁移规则 |
 | `docs/TESTING.md` | 测试数据库说明和预期服务器配置 |
-| `docs/DATA-MODEL.md` | 只保留一份迁移路径 |
 | `docs/ARCHITECTURE.md` | 数据库说明 |
 | `docs/AGENT-WORKFLOW.md` | 迁移规则 |
 | `docs/DECISIONS.md` | ADR-006 标记为被 ADR-013 取代 |

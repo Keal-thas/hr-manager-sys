@@ -145,7 +145,6 @@ tests
 
 同时更新:
 
-- `docs/DATA-MODEL.md`
 - 相关测试
 - `SESSION-NOTES.md` 如果交付范围变化
 
@@ -159,7 +158,6 @@ tests
 - 业务错误抛 `BusinessException`.
 - 分页统一 `PageResult`.
 - 新增接口尽量放在已有模块下.
-- 新增或修改接口后更新 `docs/API.md`.
 - Swagger: `/swagger-ui.html`, `/v3/api-docs`.
 - 密码必须 BCrypt.
 - 不记录明文密码, token, 密钥.

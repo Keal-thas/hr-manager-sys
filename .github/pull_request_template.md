@@ -12,9 +12,8 @@
 - [ ] 没有为监控在业务 service 中新增埋点
 - [ ] 企业微信 secret 没有提交, 配置来自环境变量
 - [ ] `src/main/resources/static` 没有被 git 跟踪
-- [ ] 数据库变更已新增 H2/MySQL Flyway 迁移, 并更新实体和 `docs/DATA-MODEL.md`
+- [ ] 数据库变更已新增 H2/MySQL Flyway 迁移, 并更新实体
 - [ ] 没有修改已应用的迁移
-- [ ] 接口变更已更新 `docs/API.md`
 - [ ] 模块或流程变更已更新 `docs/ARCHITECTURE.md`
 - [ ] 前端结构或选择器变更已更新 `docs/FRONTEND.md`
 - [ ] 新增交互元素带 `data-testid`

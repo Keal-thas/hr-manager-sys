@@ -292,9 +292,7 @@ ops/monitoring/       Prometheus, Grafana, 告警规则
 > AI agent 当前只改代码并直接提交, 不运行测试, 构建或 CI. 最终用户手动跑全量测试, 见 [AGENTS.md](AGENTS.md).
 
 - [docs/](docs/README.md): 文档索引
-- [docs/DATA-MODEL.md](docs/DATA-MODEL.md): ER 图, 表结构, 枚举, 索引
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): 模块, 登录/考勤/通知流程
-- [docs/API.md](docs/API.md): 接口清单和示例
 - [docs/TESTING.md](docs/TESTING.md): 测试策略和冒烟清单
 - [docs/FRONTEND.md](docs/FRONTEND.md): 前端结构, 设计系统, E2E 选择器
 - [docs/MONITORING.md](docs/MONITORING.md): 指标, Prometheus, Grafana, 告警

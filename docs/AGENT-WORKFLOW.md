@@ -13,8 +13,6 @@ AGENTS.md
 README.md
 WORKFLOW.md
 docs/ARCHITECTURE.md
-docs/DATA-MODEL.md
-docs/API.md
 docs/TESTING.md
 SESSION-NOTES.md
 ```
@@ -47,8 +45,7 @@ git log --oneline -5
 3. 业务错误抛 `BusinessException`
 4. JDK 8 语法
 5. 补 `@SpringBootTest + MockMvc` 测试
-6. 更新 `docs/API.md`
-7. 如涉及模块或流程, 更新 `docs/ARCHITECTURE.md`
+6. 如涉及模块或流程, 更新 `docs/ARCHITECTURE.md`
 
 验证:
 
@@ -65,8 +62,6 @@ mvn -B -ntp test
 2. 修改 entity / mapper
 3. 修改 `DataInitializer` (如果种子数据受影响)
 4. 补测试
-5. 更新 `docs/DATA-MODEL.md`
-6. 更新 `docs/API.md` (如果接口字段变化)
 
 验证:
 
