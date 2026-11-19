@@ -11,7 +11,7 @@ This file is mandatory for AI agents working in this repository.
 - 禁止为了 pre-commit 或 pre-push 安装 JDK, Maven 或其他环境.
 - hook 因环境缺失失败时, 直接用 `--no-verify`, 禁止修环境.
 - 允许提交或推送后的 CI 失败, 禁止为了 CI 结果返工.
-- 只做代码修改和必要文档更新, 然后直接提交.
+- 只做代码修改和必要文档更新, 然后直接提交并 push.
 - 最终用户会自己手动跑一次全量测试.
 
 ## Read first

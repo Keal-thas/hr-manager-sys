@@ -231,7 +231,7 @@ ops/monitoring/       Prometheus, Grafana, 告警规则
 
 ## 开发与工作流
 
-> AI agent 当前只改代码并直接提交, 不运行测试, 构建或 CI. 最终用户手动跑全量测试, 见 [AGENTS.md](AGENTS.md).
+> AI agent 当前只改代码并直接提交、push, 不运行测试, 构建或 CI. 最终用户手动跑全量测试, 见 [AGENTS.md](AGENTS.md).
 
 - [docs/](docs/README.md): 文档索引
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): 模块, 登录/考勤/通知流程

@@ -27,7 +27,7 @@ git log --oneline -5
 要求:
 
 - 不覆盖用户未提交的改动
-- 不主动提交, 除非用户明确要求
+- 主动提交并 push, 无需逐次确认
 - 先定位模块, 再读文件, 不要一上来全仓库搜索
 - 涉及前端先看 `web/src/views`, `web/src/layouts`, `web/src/api.js`
 - 涉及数据库先看 `db/migration` 和 `MigrationConsistencyTest`
