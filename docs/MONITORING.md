@@ -8,7 +8,7 @@
 HTTP 请求
 JVM
 进程和系统
-HikariCP 连接池
+Druid 连接池
 应用健康检查
 ```
 
@@ -139,15 +139,9 @@ system_load_average_1m
 
 ### 4.4 连接池
 
-HikariCP 自动绑定:
+Druid 连接池不自动输出 Micrometer 指标. 连接池状态通过 `/actuator/health` 的 DataSource 检查查看.
 
-```text
-hikaricp_connections_active
-hikaricp_connections_idle
-hikaricp_connections_pending
-hikaricp_connections_max
-hikaricp_connections_timeout_total
-```
+如需把连接池指标送进 Prometheus, 需要单独的只读 exporter, 不在当前范围.
 
 ## 5. 本地验证
 
@@ -202,12 +196,11 @@ ops/monitoring/grafana/dashboards/hr-manager-technical.json
 - HTTP 5xx 比例
 - P95 延迟
 - 进程 CPU
-- Hikari pending
+- 进程运行时长
 - 接口 QPS
 - HTTP 状态码分布
 - JVM 堆
 - JVM 线程数
-- Hikari 连接数
 
 Prometheus 抓取目标:
 
@@ -236,7 +229,6 @@ hr-manager-technical
 | `HighHttp5xxRate` | 5 分钟 5xx 比例 > 5% | warning |
 | `HighP95Latency` | P95 > 1.5s 持续 10 分钟 | warning |
 | `HighProcessCpu` | 进程 CPU > 85% 持续 10 分钟 | warning |
-| `HikariPoolSaturation` | pending > 5 或 active/max > 90% | warning |
 
 规则只定义在 Prometheus. 告警通知链路不在当前范围, 需要时再接 Alertmanager.
 告警阈值是演示值, 生产按实际流量调整.

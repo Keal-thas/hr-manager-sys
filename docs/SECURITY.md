@@ -113,7 +113,7 @@
 
 风险:
 
-- `/actuator/prometheus` 会暴露应用名, 接口路径, JVM, 数据库连接池等运行信息
+- `/actuator/prometheus` 会暴露应用名, 接口路径, JVM, 进程等运行信息
 - `/actuator/health` 在 `show-details: always` 时会返回组件细节
 
 生产要求:

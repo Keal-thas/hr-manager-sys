@@ -114,11 +114,11 @@
     {
       "id": 4,
       "type": "stat",
-      "title": "Hikari pending",
+      "title": "Process uptime",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "h": 6, "w": 6, "x": 18, "y": 0 },
-      "targets": [{ "refId": "A", "expr": "hikaricp_connections_pending", "legendFormat": "pending" }],
-      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0 }, "overrides": [] },
+      "targets": [{ "refId": "A", "expr": "process_uptime_seconds", "legendFormat": "uptime" }],
+      "fieldConfig": { "defaults": { "unit": "s", "decimals": 0 }, "overrides": [] },
       "options": {
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
         "colorMode": "value",
@@ -191,24 +191,6 @@
         "overrides": []
       },
       "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": false }, "tooltip": { "mode": "single", "sort": "none" } }
-    },
-    {
-      "id": 9,
-      "type": "timeseries",
-      "title": "Hikari connections",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "h": 7, "w": 24, "x": 0, "y": 22 },
-      "targets": [
-        { "refId": "A", "expr": "hikaricp_connections_active", "legendFormat": "active" },
-        { "refId": "B", "expr": "hikaricp_connections_idle", "legendFormat": "idle" },
-        { "refId": "C", "expr": "hikaricp_connections_pending", "legendFormat": "pending" },
-        { "refId": "D", "expr": "hikaricp_connections_max", "legendFormat": "max" }
-      ],
-      "fieldConfig": {
-        "defaults": { "unit": "short", "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 10 } },
-        "overrides": []
-      },
-      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } }
     }
   ],
   "schemaVersion": 39,

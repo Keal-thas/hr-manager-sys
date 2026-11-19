@@ -11,6 +11,7 @@
 - JDK 8
 - Spring Boot 2.7.18
 - MyBatis Plus 3.5.7
+- Druid 1.2.23 (连接池)
 - H2 (开发默认) / MySQL 8 (生产)
 - React 18 + Vite + Ant Design 5
 - Vitest (前端单元测试)
@@ -33,7 +34,7 @@
 - 通知管理: 全员/部门/指定员工发布, 通知模板
 - 系统管理: 部门树, 角色权限, 用户管理, 重置密码, 启停用
 - 企业微信: 站内消息同步落库, 应用消息异步推送, 发送日志, 用户 UserID 映射
-- 可观测性: 健康检查, HTTP/JVM/连接池技术指标, Prometheus 抓取, Grafana 面板
+- 可观测性: 健康检查, HTTP/JVM/进程技术指标, Prometheus 抓取, Grafana 面板
 - 质量保障: 后端集成测试, 前端单元测试, Playwright E2E, CI 三档校验
 
 ## 快速启动

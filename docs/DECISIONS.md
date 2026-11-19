@@ -83,7 +83,7 @@
 
 决策:
 
-- Prometheus 只采集技术指标: HTTP, JVM, 进程, HikariCP, health.
+- Prometheus 只采集技术指标: HTTP, JVM, 进程, Druid, health.
 - 不在业务 service 中注入 metrics.
 - 业务健康如果后续需要, 用独立只读 exporter.
 

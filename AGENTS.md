@@ -136,7 +136,7 @@ The Flyway migrations are the schema source of truth. Keep `docs/DATA-SCOPE.md` 
 
 ## Monitoring
 
-- Monitoring is technical only: HTTP, JVM, process, HikariCP, health.
+- Monitoring is technical only: HTTP, JVM, process, Druid, health.
 - Do not inject metrics into business services.
 - Do not add business health metrics without a separate exporter design.
 - Do not add high-cardinality labels (user id, employee no, timestamps).

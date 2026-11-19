@@ -40,15 +40,3 @@ groups:
         annotations:
           summary: Process CPU above 85%
           description: "Process CPU is {{ $value | humanizePercentage }}."
-
-      - alert: HikariPoolSaturation
-        expr: |
-          hikaricp_connections_pending > 5
-          or
-          (hikaricp_connections_active / clamp_min(hikaricp_connections_max, 1)) > 0.9
-        for: 5m
-        labels:
-          severity: warning
-        annotations:
-          summary: Hikari connection pool saturated
-          description: "Pending {{ $value }} or active/max ratio above 90%."
