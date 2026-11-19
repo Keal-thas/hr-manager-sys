@@ -1,0 +1,40 @@
+name: hr-sandbox
+
+services:
+  sandbox:
+    build: .
+    image: hr-sandbox:local
+    container_name: hr-sandbox
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8081:8081"
+      - "127.0.0.1:4097:4097"
+    environment:
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      GH_TOKEN: ${GITHUB_TOKEN:-}
+      OPENCODE_SERVER_PASSWORD: ${OPENCODE_SERVER_PASSWORD:?set OPENCODE_SERVER_PASSWORD in .env}
+      OPENCODE_DISABLE_AUTOUPDATE: "1"
+      APP_PORT: "8081"
+      OC_PORT: "4097"
+      REBUILD: ${REBUILD:-0}
+      REFRESH: ${REFRESH:-0}
+      TZ: Asia/Shanghai
+    volumes:
+      - workspace:/workspace
+      - m2:/root/.m2
+      - npm-cache:/root/.npm
+      - opencode-data:/root/.local/share/opencode
+      - opencode-config:/root/.config/opencode
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8081/api/health >/dev/null && curl -fsS -u \"opencode:$$OPENCODE_SERVER_PASSWORD\" http://127.0.0.1:4097/ >/dev/null"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 600s
+
+volumes:
+  workspace:
+  m2:
+  npm-cache:
+  opencode-data:
+  opencode-config:
