@@ -1,8 +1,8 @@
 # Agent 工作流
 
-> 当前 AI agent 提交约定见 `AGENTS.md`: 禁止运行测试, 构建或 CI 检查; 最终用户手动跑全量测试.
+> 规则以 `AGENTS.md` 为准: agent 不运行测试, 构建或 CI 检查; 直接提交并 push, 最终用户手动跑全量测试.
 
-本文档给 AI agent 使用. 目标是把任务拆成可验证的小步, 每一步都留下证据, 避免"改了很多但没人知道是否真的能用".
+本文档只描述任务怎么做, 不重复规则和检查命令.
 
 ## 1. 开工前
 
@@ -38,8 +38,6 @@ git log --oneline -5
 
 适用: 新接口, 业务规则, 状态流转.
 
-步骤:
-
 1. 在对应模块 `controller/service/mapper/entity` 定位改动点
 2. 保持 `ApiResponse` 结构
 3. 业务错误抛 `BusinessException`
@@ -47,36 +45,16 @@ git log --oneline -5
 5. 补 `@SpringBootTest + MockMvc` 测试
 6. 如涉及模块或流程, 更新 `docs/ARCHITECTURE.md`
 
-验证:
-
-```bash
-mvn -q -DskipTests compile
-mvn -B -ntp test
-```
-
 ### 2.2 数据库变更
-
-步骤:
 
 1. 在 `db/migration/h2` 和 `db/migration/mysql` 新增同版本迁移
 2. 修改 entity / mapper
 3. 修改 `DataInitializer` (如果种子数据受影响)
 4. 补测试
 
-验证:
-
-```bash
-mvn -B -ntp -Dtest=MigrationConsistencyTest test
-mvn -B -ntp -Dtest=MySqlSchemaIntegrationTests test
-mvn -B -ntp verify
-```
-
-`MySqlSchemaIntegrationTests` 需要 Docker, 没有 Docker 时自动跳过.
-必须保持 H2 和 MySQL 表名, 列名一致. 不修改已应用的迁移.
+`MySqlSchemaIntegrationTests` 需要 Docker, 没有 Docker 时自动跳过. 必须保持 H2 和 MySQL 表名, 列名一致. 不修改已应用的迁移.
 
 ### 2.3 前端功能
-
-步骤:
 
 1. 先看 `web/src/App.jsx` 的视图映射
 2. 页面放 `web/src/views`, 共享布局放 `web/src/layouts`, 共享组件放 `web/src/components`
@@ -85,38 +63,19 @@ mvn -B -ntp verify
 5. 需要新设计 token 时改 `web/src/theme.js` 或 `styles.css`
 6. 更新 `docs/FRONTEND.md` 的目录或选择器清单
 
-验证:
-
-```bash
-cd web
-npm test
-npm run build
-```
-
 ### 2.4 E2E
 
-步骤:
-
-1. 在 `web/e2e` 新增或用例文件命名 `NN-场景.spec.js`
+1. 在 `web/e2e` 新增或用例命名 `NN-场景.spec.js`
 2. 复用 `web/e2e/support/auth.js`
 3. 优先 `getByTestId`
 4. 不依赖测试顺序和共享可变数据
-5. 需要新种子数据时, 优先在 `DataInitializer` 增加稳定数据, 不要依赖上一次运行残留
+5. 需要新种子数据时, 优先在 `DataInitializer` 增加稳定数据
 
-验证:
-
-```bash
-cd web
-npm run e2e
-```
-
-本机默认用系统 Chrome. CI 用 Playwright Chromium.
+本机默认用系统 Chrome, CI 用 Playwright Chromium. E2E 端口固定 18080.
 
 ### 2.5 监控/指标
 
 当前只做技术指标.
-
-步骤:
 
 1. 优先复用 Actuator/Micrometer 自动指标
 2. 不在业务 service 中注入 metrics
@@ -125,16 +84,7 @@ npm run e2e
 5. 更新 `docs/MONITORING.md` 指标和告警说明
 6. 补 `MonitoringApiTests`
 
-验证:
-
-```bash
-mvn -B -ntp -Dtest=MonitoringApiTests test
-curl http://localhost:8080/actuator/prometheus
-```
-
-### 2.5.1 企业微信
-
-步骤:
+### 2.6 企业微信
 
 1. 只改 `integration/wecom`, 不在业务 service 里写 HTTP
 2. 新增推送场景使用 `WeComNotifier`, 不要绕开日志
@@ -143,71 +93,23 @@ curl http://localhost:8080/actuator/prometheus
 5. 补 `WeComClientTest` 或 `WeComNotifierTest`
 6. 更新 `docs/WECOM.md`
 
-验证:
-
-```bash
-mvn -B -ntp -Dtest=WeComClientTest,WeComNotifierTest test
-```
-
-### 2.6 发布/流程
-
-步骤:
+### 2.7 发布/流程
 
 1. 更新 `README.md`, `SESSION-NOTES.md`
 2. 更新相关 docs
 3. 检查 git 只包含源码
-4. 运行完整检查
+4. 提交并 push
 
-验证:
+## 3. 交接
 
-```bash
-bash scripts/agent-check.sh full
-```
-
-## 3. 检查分层
-
-`scripts/agent-check.sh` 提供三档:
-
-```bash
-bash scripts/agent-check.sh quick      # 后端编译 + 前端单测
-bash scripts/agent-check.sh standard   # scripts/check.sh
-bash scripts/agent-check.sh full       # standard + E2E
-```
-
-对应关系:
-
-| 档位 | 内容 | 适用 |
-|---|---|---|
-| quick | `mvn compile`, `npm test` | 改一处逻辑, 快速反馈 |
-| standard | 前端测试/构建, 静态产物未被跟踪, `mvn verify` | 提交前 |
-| full | standard + Playwright E2E | 交付前或改动登录/考勤/通知主流程 |
-
-## 4. 完成定义
-
-一个任务只有同时满足以下条件才算完成:
-
-```text
-[ ] 代码可编译
-[ ] 相关测试通过
-[ ] 新增行为有测试
-[ ] 文档已更新
-[ ] git status 没有意外文件
-[ ] 没有提交密钥, data/, target/, node_modules/, static 产物
-[ ] 关键路径有可复现的验证命令和结果
-```
-
-## 5. 交接模板
-
-最终回复或 PR 描述使用:
+最终回复说明:
 
 ```text
 ## 改动
 - ...
 
-## 验证
-- mvn -B -ntp verify: PASS
-- cd web && npm test: PASS
-- cd web && npm run e2e: PASS (11 tests)
+## 文档
+- ...
 
 ## 风险
 - ...
@@ -216,7 +118,9 @@ bash scripts/agent-check.sh full       # standard + E2E
 - ...
 ```
 
-## 6. 常见坑
+验证结果由最终用户执行, 不在 agent 回复里声称 PASS.
+
+## 4. 常见坑
 
 - AntD 两个汉字的按钮可访问名会变成"保 存", E2E 用 `data-testid`
 - AntD Form 的 `getByLabel` 在 Modal 内要限定 modal 范围
@@ -227,16 +131,3 @@ bash scripts/agent-check.sh full       # standard + E2E
 - 改动作业前先看 `git status`, 不要把用户未完成的改动一起格式化
 - E2E 服务端口固定 `18080`, 避免和开发环境 `8080` 冲突
 - `npm run e2e` 会先 build, 再启动 Spring Boot, 最后跑 Playwright
-
-## 7. 目录速查
-
-```text
-src/main/java/com/hrmanager   后端模块
-src/test/java                 后端测试
-src/main/resources            Flyway 迁移, 配置, 静态产物
-web/src                       前端源码
-web/e2e                       Playwright 用例
-ops/monitoring                Prometheus, Grafana
-scripts                       hooks, check, e2e
-docs                          设计, API, 数据模型, 测试, 监控, 前端, agent 流程
-```

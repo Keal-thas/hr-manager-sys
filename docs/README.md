@@ -11,7 +11,7 @@
 7. [FRONTEND.md](FRONTEND.md): 前端结构, 设计系统, 测试选择器
 8. [MONITORING.md](MONITORING.md): 指标, Prometheus, Grafana, 告警
 9. [WECOM.md](WECOM.md): 企业微信配置, 用户映射, 失败处理
-10. [AGENT-WORKFLOW.md](AGENT-WORKFLOW.md): AI agent 任务工作流和检查分层
+10. [AGENT-WORKFLOW.md](AGENT-WORKFLOW.md): AI agent 任务步骤和常见坑
 11. [SECURITY.md](SECURITY.md): 认证, 密码, 上传, 密钥
 12. [DECISIONS.md](DECISIONS.md): 关键决策记录
 13. [UNIFIED-MYSQL.md](UNIFIED-MYSQL.md): 统一 MySQL 方案, 测试和环境的数据库拓扑

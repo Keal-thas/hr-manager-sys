@@ -239,7 +239,7 @@ ops/monitoring/       Prometheus, Grafana, 告警规则
 - [docs/FRONTEND.md](docs/FRONTEND.md): 前端结构, 设计系统, E2E 选择器
 - [docs/MONITORING.md](docs/MONITORING.md): 指标, Prometheus, Grafana, 告警
 - [docs/WECOM.md](docs/WECOM.md): 企业微信集成配置, 用户映射, 失败处理
-- [docs/AGENT-WORKFLOW.md](docs/AGENT-WORKFLOW.md): AI agent 任务工作流
+- [docs/AGENT-WORKFLOW.md](docs/AGENT-WORKFLOW.md): AI agent 任务步骤和常见坑
 - [docs/SECURITY.md](docs/SECURITY.md): 认证, 密码, 上传, 密钥
 - [docs/DECISIONS.md](docs/DECISIONS.md): 关键决策记录
 - [docs/UNIFIED-MYSQL.md](docs/UNIFIED-MYSQL.md): 统一 MySQL 方案, 测试和环境的数据库拓扑
