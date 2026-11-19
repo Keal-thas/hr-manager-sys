@@ -139,9 +139,18 @@ system_load_average_1m
 
 ### 4.4 连接池
 
-Druid 连接池不自动输出 Micrometer 指标. 连接池状态通过 `/actuator/health` 的 DataSource 检查查看.
+`DruidMetricsConfig` 把 Druid 连接池状态注册为 Micrometer gauge:
 
-如需把连接池指标送进 Prometheus, 需要单独的只读 exporter, 不在当前范围.
+```text
+druid_connections_active
+druid_connections_idle
+druid_connections_max
+druid_connections_pending
+druid_connections_create
+druid_connections_destroy
+```
+
+这些指标只读, 只反映连接池技术状态.
 
 ## 5. 本地验证
 
@@ -196,11 +205,12 @@ ops/monitoring/grafana/dashboards/hr-manager-technical.json
 - HTTP 5xx 比例
 - P95 延迟
 - 进程 CPU
-- 进程运行时长
+- Druid pending
 - 接口 QPS
 - HTTP 状态码分布
 - JVM 堆
 - JVM 线程数
+- Druid 连接数
 
 Prometheus 抓取目标:
 
@@ -229,6 +239,7 @@ hr-manager-technical
 | `HighHttp5xxRate` | 5 分钟 5xx 比例 > 5% | warning |
 | `HighP95Latency` | P95 > 1.5s 持续 10 分钟 | warning |
 | `HighProcessCpu` | 进程 CPU > 85% 持续 10 分钟 | warning |
+| `DruidPoolSaturation` | pending > 5 或 active/max > 90% | warning |
 
 规则只定义在 Prometheus. 告警通知链路不在当前范围, 需要时再接 Alertmanager.
 告警阈值是演示值, 生产按实际流量调整.

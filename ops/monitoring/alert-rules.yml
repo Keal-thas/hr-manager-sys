@@ -40,3 +40,15 @@ groups:
         annotations:
           summary: Process CPU above 85%
           description: "Process CPU is {{ $value | humanizePercentage }}."
+
+      - alert: DruidPoolSaturation
+        expr: |
+          druid_connections_pending > 5
+          or
+          (druid_connections_active / clamp_min(druid_connections_max, 1)) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Druid connection pool saturated
+          description: "Pending {{ $value }} or active/max ratio above 90%."
