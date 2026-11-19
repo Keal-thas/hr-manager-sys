@@ -1,13 +1,7 @@
 import React, { useState } from 'react';
-import { Alert, Button, Card, Form, Input, Tag, Typography } from 'antd';
-import { LockOutlined, SafetyCertificateOutlined, ScheduleOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
+import { Alert, Button, Card, Form, Input, Typography } from 'antd';
+import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import api from '../api';
-
-const highlights = [
-  { icon: <ScheduleOutlined />, title: '考勤确认', text: '月度考勤签收, 手写签名, 异常提醒' },
-  { icon: <TeamOutlined />, title: '组织权限', text: '部门树, 角色菜单, 用户生命周期' },
-  { icon: <SafetyCertificateOutlined />, title: '安全登录', text: 'BCrypt 密码, 失败锁定, 初始密码强制修改' }
-];
 
 export default function Login({ onLogin }) {
   const [loading, setLoading] = useState(false);
@@ -25,27 +19,6 @@ export default function Login({ onLogin }) {
   return (
     <div className="login-page">
       <div className="login-shell">
-        <section className="login-hero">
-          <Tag color="blue">HR MANAGER</Tag>
-          <Typography.Title level={1} className="login-hero-title">
-            让考勤与组织管理更简单
-          </Typography.Title>
-          <Typography.Paragraph className="login-hero-text">
-            一个保持简单的 HR 管理系统: 月度考勤签收, 站内消息通知, 部门与角色权限.
-          </Typography.Paragraph>
-          <div className="login-highlights">
-            {highlights.map((item) => (
-              <div className="login-highlight" key={item.title}>
-                <span className="login-highlight-icon">{item.icon}</span>
-                <div>
-                  <div className="login-highlight-title">{item.title}</div>
-                  <div className="login-highlight-text">{item.text}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
         <Card className="login-card" variant="borderless">
           <Typography.Title level={3} style={{ textAlign: 'center', marginBottom: 4 }}>
             人事综合管理系统

@@ -90,7 +90,7 @@ App
 
 ```text
 --app-brand, --app-ink, --app-muted, --app-surface, --app-bg
-登录页左右分栏和渐变背景
+登录页居中卡片和渐变背景
 侧栏品牌块
 统一头部, 内容最大宽度, 页脚
 签名画布
