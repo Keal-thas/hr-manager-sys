@@ -2,7 +2,7 @@
 
 状态: 已决定, 待实施
 
-取代: ADR-006 (H2 开发, MySQL 生产)
+对应决策: ADR-013
 
 ## 1. 背景
 
@@ -147,7 +147,7 @@ SELECT COUNT(*) FROM mysql.time_zone_name;
 | `docs/TESTING.md` | 测试数据库说明和预期服务器配置 |
 | `docs/ARCHITECTURE.md` | 数据库说明 |
 | `docs/AGENT-WORKFLOW.md` | 迁移规则 |
-| `docs/DECISIONS.md` | ADR-006 标记为被 ADR-013 取代 |
+| `docs/DECISIONS.md` | 记录 ADR-013 统一 MySQL |
 
 ## 8. 需要先修复的测试
 
