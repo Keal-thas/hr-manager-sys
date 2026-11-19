@@ -2,7 +2,7 @@
 
 ## 1. 仓库
 
-私有源码:
+源码仓库:
 
 ```text
 https://github.com/Keal-thas/hr-manager-sys
@@ -108,7 +108,7 @@ gh release create v1.0.0 <zip> \
 
 更新步骤:
 
-1. 私有仓库打 tag
+1. 源码仓库打 tag
 2. 生成新的加密压缩包
 3. 创建新的 Release
 4. 在公有仓库 README 更新版本说明
