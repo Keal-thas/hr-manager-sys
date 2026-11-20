@@ -55,7 +55,8 @@ public class MessageService {
                                        String keyword, Boolean unreadOnly) {
         LambdaQueryWrapper<SysMessage> wrapper = Wrappers.<SysMessage>lambdaQuery()
                 .eq(SysMessage::getUserId, userId)
-                .orderByDesc(SysMessage::getCreatedAt);
+                .orderByDesc(SysMessage::getCreatedAt)
+                .orderByDesc(SysMessage::getId);
         if (StringUtils.hasText(type)) {
             wrapper.eq(SysMessage::getType, type);
         }

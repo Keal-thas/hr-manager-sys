@@ -11,11 +11,6 @@ JDK 8
 Maven 3.9+
 Node.js 20+
 npm 10+
-```
-
-可选:
-
-```text
 MySQL 8
 ```
 
@@ -120,7 +115,6 @@ test: add login test
 任何表结构变更必须同步:
 
 ```text
-src/main/resources/db/migration/h2/V<version>__<name>.sql
 src/main/resources/db/migration/mysql/V<version>__<name>.sql
 entity / mapper
 DataInitializer
@@ -129,11 +123,8 @@ tests
 
 规则:
 
-- H2 和 MySQL 使用相同版本号
 - 已应用的迁移不能修改, 只能新增版本
-- H2 和 MySQL 表名, 列名必须一致
-- `MigrationConsistencyTest` 会校验
-- `MySqlSchemaIntegrationTests` 会在 Docker 环境真实执行 MySQL 迁移
+- 测试在真实 MySQL 8 上执行迁移, 本机需有可用的 MySQL
 
 ## 7. CI/CD
 

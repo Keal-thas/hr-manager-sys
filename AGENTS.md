@@ -14,6 +14,11 @@ This file is mandatory for AI agents working in this repository.
 - 只做代码修改和必要文档更新, 然后直接提交并 push.
 - 最终用户会自己手动跑一次全量测试.
 
+## 编码与文档原则
+
+- 重构优先于打补丁: 遇到设计不良或重复逻辑, 先重构消除根因, 不要用 workaround 掩盖问题.
+- 文档是给人看的: 准确简洁, 不堆砌细节; 需求表述可适度模糊, 抓住大意即可, 不必追求精确.
+
 ## Read first
 
 1. `README.md`
@@ -33,7 +38,7 @@ This file is mandatory for AI agents working in this repository.
 - JDK 8. Do not use `var`, records, text blocks, `List.of`, `Map.of`, switch expressions, or any Java 9+ API.
 - Spring Boot 2.7.x, MyBatis Plus 3.5.x.
 - React 18, Vite 5, Ant Design 5.
-- H2 for development, MySQL for production.
+- MySQL 8 for all environments.
 - Keep API responses in the `ApiResponse` shape `{code, message, data}`.
 - Keep existing module boundaries: `auth`, `user`, `dept`, `role`, `attendance`, `notice`, `integration`, `dashboard`, `common`, `config`.
 - WeCom outbound app messages are supported through `integration/wecom`.
@@ -88,9 +93,8 @@ This file is mandatory for AI agents working in this repository.
 
 Database changes use Flyway.
 
-When a table or column changes, add both migrations:
+When a table or column changes, add a migration:
 
-- `src/main/resources/db/migration/h2/V<version>__<name>.sql`
 - `src/main/resources/db/migration/mysql/V<version>__<name>.sql`
 
 Then update:
@@ -99,7 +103,7 @@ Then update:
 - `DataInitializer` if seed data is affected
 - tests if behavior changes
 
-Keep H2 and MySQL migrations consistent. Never edit an applied migration.
+Never edit an applied migration.
 
 The Flyway migrations are the schema source of truth. Keep `docs/DATA-SCOPE.md` in sync for business-model changes, and `docs/ARCHITECTURE.md` for module or flow changes.
 
@@ -123,8 +127,7 @@ The Flyway migrations are the schema source of truth. Keep `docs/DATA-SCOPE.md` 
 - `mvn -B -ntp verify` must pass.
 - `cd web && npm test` must pass.
 - For login, attendance, notice, or layout changes, add or update `web/e2e/*.spec.js` and run `cd web && npm run e2e`.
-- Keep H2 and MySQL migrations in sync; `MigrationConsistencyTest` enforces it.
-- `MySqlSchemaIntegrationTests` needs Docker and runs in CI.
+- Backend tests run against a local MySQL 8 using a fresh schema per run; see `docs/TESTING.md`.
 - Do not weaken or delete tests to make CI pass.
 
 ## DOCX conversion tooling

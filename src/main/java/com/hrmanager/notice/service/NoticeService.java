@@ -116,7 +116,8 @@ public class NoticeService {
 
     public PageResult<MessageNotice> page(int page, int size) {
         Page<MessageNotice> result = noticeMapper.selectPage(new Page<>(page, size),
-                Wrappers.<MessageNotice>lambdaQuery().orderByDesc(MessageNotice::getCreatedAt));
+                Wrappers.<MessageNotice>lambdaQuery().orderByDesc(MessageNotice::getCreatedAt)
+                        .orderByDesc(MessageNotice::getId));
         return new PageResult<>(result.getRecords(), result.getTotal(), result.getCurrent(), result.getSize());
     }
 
@@ -130,7 +131,8 @@ public class NoticeService {
 
     public List<NoticeTemplate> templates(String status, String keyword) {
         LambdaQueryWrapper<NoticeTemplate> wrapper = Wrappers.<NoticeTemplate>lambdaQuery()
-                .orderByDesc(NoticeTemplate::getCreatedAt);
+                .orderByDesc(NoticeTemplate::getCreatedAt)
+                .orderByDesc(NoticeTemplate::getId);
         if (!StringUtils.hasText(status)) {
             wrapper.eq(NoticeTemplate::getStatus, "ACTIVE");
         } else if (!"ALL".equalsIgnoreCase(status)) {

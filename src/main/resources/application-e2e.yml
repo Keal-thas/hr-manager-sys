@@ -3,19 +3,18 @@ server:
 
 spring:
   datasource:
-    url: jdbc:h2:mem:hr_e2e;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    url: "jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:hr_e2e}?useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true&sessionVariables=sql_mode='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION',time_zone='+08:00'&connectionTimeZone=Asia/Shanghai&forceConnectionTimeZoneToSession=true"
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:}
+    druid:
+      exception-sorter-class-name: com.hrmanager.config.LenientMySqlExceptionSorter
   flyway:
     enabled: true
-    locations: classpath:db/migration/h2
+    locations: classpath:db/migration/mysql
     baseline-on-migrate: true
     baseline-version: 0
     validate-on-migrate: true
-  h2:
-    console:
-      enabled: false
 
 logging:
   level:

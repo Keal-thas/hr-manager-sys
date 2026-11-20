@@ -20,8 +20,8 @@
 
 - 主键 `id BIGINT AUTO_INCREMENT`, 时间字段 `created_at`, `updated_at`.
 - 逻辑删除用 `status`.
-- schema 以 `src/main/resources/db/migration` 的 Flyway 迁移为唯一来源.
-- 变更必须新增迁移, 不修改已应用的迁移; H2 和 MySQL 同版本.
+- schema 以 `src/main/resources/db/migration/mysql` 的 Flyway 迁移为唯一来源.
+- 变更必须新增迁移, 不修改已应用的迁移.
 
 ## 前端
 

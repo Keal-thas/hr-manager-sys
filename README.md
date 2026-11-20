@@ -12,11 +12,10 @@
 - Spring Boot 2.7.18
 - MyBatis Plus 3.5.7
 - Druid 1.2.23 (连接池)
-- H2 (开发默认) / MySQL 8 (生产)
+- MySQL 8 (所有环境)
 - React 18 + Vite + Ant Design 5
 - Vitest (前端单元测试)
 - Playwright (浏览器 E2E)
-- Testcontainers (MySQL 集成测试)
 - Flyway (数据库版本管理)
 - 企业微信应用消息 (可选, 默认关闭)
 - Spring Boot Actuator + Micrometer + Prometheus
@@ -38,6 +37,8 @@
 - 质量保障: 后端集成测试, 前端单元测试, Playwright E2E, CI 三档校验
 
 ## 快速启动
+
+依赖本机 MySQL 8. 默认连接 `localhost:3306`, 用户 `root`, 密码为空; 可通过 `DB_HOST` / `DB_PORT` / `DB_NAME` / `DB_USERNAME` / `DB_PASSWORD` 覆盖. 开发库名 `hr_dev` 会在首次启动时自动创建.
 
 前端构建产物不提交到 git. 先构建前端:
 
@@ -93,16 +94,7 @@ docker compose up -d
 
 Grafana: `http://localhost:3000`, Prometheus: `http://localhost:9090`.
 
-H2 控制台:
-
-```text
-http://localhost:8080/h2-console
-JDBC URL: jdbc:h2:file:./data/hr
-User: sa
-Password: 留空
-```
-
-首次启动会自动建表并写入演示数据. 数据文件在 `data/`, 已加入 `.gitignore`.
+首次启动会自动建表并写入演示数据 (Flyway 迁移 + `DataInitializer`).
 
 ## 默认账号
 
@@ -155,7 +147,7 @@ CI 使用 Playwright Chromium.
 ## MySQL 部署
 
 1. 创建数据库 `hr_manager`
-2. 设置 `DB_USERNAME` / `DB_PASSWORD` 环境变量, 按需修改连接串
+2. 设置 `DB_HOST` / `DB_PORT` / `DB_NAME` / `DB_USERNAME` / `DB_PASSWORD` 环境变量
 3. 构建前端并打包:
 
 ```bash
@@ -220,7 +212,6 @@ src/main/java/com/hrmanager
   common      响应, 异常, 拦截器, 菜单
   config      初始化数据, MyBatis Plus, 密码
 src/main/resources
-  db/migration/h2     Flyway H2 迁移
   db/migration/mysql  Flyway MySQL 迁移
   static/             React 构建产物, git 忽略
 src/test/java        后端集成测试和单元测试
@@ -316,9 +307,7 @@ bash scripts/agent-check.sh standard
 bash scripts/agent-check.sh full
 ```
 
-集成测试默认使用 H2 内存库, Flyway 自动执行 `db/migration/h2`. `MigrationConsistencyTest` 会校验 H2 和 MySQL 迁移版本, 表和列保持一致.
-
-`MySqlSchemaIntegrationTests` 使用 Testcontainers 启动 MySQL 8, 真实执行 Flyway `db/migration/mysql` 并验证种子数据和登录. 本机没有 Docker 时该用例自动跳过, CI 会执行.
+集成测试需要本机 MySQL 8, 每次运行自动创建临时 schema (`hr_test_<runId>`), Flyway 执行 `db/migration/mysql` 并写入种子数据. 连接参数可用 `TEST_DB_HOST` / `TEST_DB_PORT` / `TEST_DB_USER` / `TEST_DB_PASSWORD` 覆盖, 默认 `localhost:3306` 的 `root` 空密码.
 
 ## 公有 Release
 

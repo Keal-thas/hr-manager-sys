@@ -143,6 +143,7 @@ public class AttendanceService {
                 .eq(AttendanceBatch::getBatchYear, year)
                 .eq(AttendanceBatch::getBatchMonth, month)
                 .orderByDesc(AttendanceBatch::getCreatedAt)
+                .orderByDesc(AttendanceBatch::getId)
                 .last("limit 1"));
     }
 
@@ -543,7 +544,8 @@ public class AttendanceService {
         Page<AttendanceRecord> result = recordMapper.selectPage(new Page<>(page, size),
                 Wrappers.<AttendanceRecord>lambdaQuery()
                         .eq(AttendanceRecord::getUserId, userId)
-                        .orderByDesc(AttendanceRecord::getCreatedAt));
+                        .orderByDesc(AttendanceRecord::getCreatedAt)
+                        .orderByDesc(AttendanceRecord::getId));
         List<Map<String, Object>> records = new ArrayList<>();
         for (AttendanceRecord record : result.getRecords()) {
             AttendanceBatch batch = batchMapper.selectById(record.getBatchId());

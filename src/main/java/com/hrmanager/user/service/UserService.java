@@ -49,7 +49,8 @@ public class UserService {
         if (StringUtils.hasText(status)) {
             wrapper.eq(SysUser::getStatus, status);
         }
-        wrapper.orderByDesc(SysUser::getCreatedAt);
+        wrapper.orderByDesc(SysUser::getCreatedAt)
+                .orderByDesc(SysUser::getId);
         Page<SysUser> result = userMapper.selectPage(new Page<>(page, size), wrapper);
         Map<Long, String> deptNames = departmentMapper.selectList(null).stream()
                 .collect(Collectors.toMap(SysDepartment::getId, SysDepartment::getName, (a, b) -> a));

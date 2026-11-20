@@ -39,7 +39,7 @@
 
 ## 数据库
 
-- Flyway 迁移是 schema 唯一来源: `db/migration/h2`, `db/migration/mysql`.
+- Flyway 迁移是 schema 唯一来源: `db/migration/mysql`.
 - 无物理外键, 由应用层保证一致性.
 - 站内消息和考勤提醒共用一个 `sys_message` 收件箱, 用类型区分.
 - 业务字段和约束见 [DATA-SCOPE.md](DATA-SCOPE.md) 和 [FIELD-CONTRACT.md](FIELD-CONTRACT.md).
@@ -55,11 +55,11 @@ Actuator 暴露 `/actuator/health`, `/actuator/metrics`, `/actuator/prometheus`.
 ## 部署
 
 ```text
-开发: Spring Boot 8080 + H2 + Vite 5173 (proxy /api)
+开发: Spring Boot 8080 + 本机 MySQL 8 + Vite 5173 (proxy /api)
 生产: MySQL 8 + jar, Flyway 启动时执行 db/migration/mysql, Nginx 可选
 ```
 
-生产建议: 关闭 H2 控制台, 关闭或限制 Swagger, HTTPS, Session 用 Redis 或粘性会话.
+生产建议: 关闭或限制 Swagger, HTTPS, Session 用 Redis 或粘性会话.
 
 ## 非目标
 

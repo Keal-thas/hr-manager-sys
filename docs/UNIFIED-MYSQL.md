@@ -1,6 +1,6 @@
 # 统一 MySQL 方案
 
-状态: 已决定, 待实施
+状态: 已实施
 
 对应决策: ADR-013
 
@@ -138,7 +138,7 @@ SELECT COUNT(*) FROM mysql.time_zone_name;
 | `src/test/resources/application-mysql-test.yml` | 与 test 配置合并后删除 |
 | `src/main/resources/db/migration/h2/` | 删除 |
 | `src/test/java/com/hrmanager/support/MigrationConsistencyTest.java` | 删除 |
-| `src/test/java/com/hrmanager/support/MySqlSchemaIntegrationTests.java` | 合并进常规测试或改为 schema 对比 |
+| `src/test/java/com/hrmanager/support/MySqlSchemaIntegrationTests.java` | 删除, 常规测试已在 MySQL 上执行 |
 | `src/test/java/com/hrmanager/support/AbstractApiTest.java` | 测试 profile 指向 MySQL |
 | `scripts/e2e-server.sh` | e2e 启动前需要可用的 MySQL |
 | `.github/workflows/ci.yml` | backend 和 e2e job 增加 MySQL service |
@@ -167,7 +167,9 @@ WeComController 日志
 
 ## 9. 新的护栏
 
-删除 `MigrationConsistencyTest` 后, 保留一项结构校验:
+状态: 未实施.
+
+删除 `MigrationConsistencyTest` 后, 计划保留一项结构校验:
 
 ```text
 1. 在同一个 MySQL 实例新建 scratch schema hr_schema_check
@@ -212,7 +214,6 @@ V3 迁移额外补充了考勤批次, 考勤记录和处罚编号的唯一索引
 - `npm run e2e` 在 MySQL 上通过.
 - `grep -r "h2" src` 无业务残留, `db/migration` 下只有 `mysql`.
 - `flyway validate` 通过.
-- scratch schema 与 UAT/生产 schema 对比无差异.
 
 ## 12. 不在本方案范围
 

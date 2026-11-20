@@ -37,7 +37,8 @@ public class WeComController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
         Page<WeComMessageLog> result = logMapper.selectPage(new Page<>(page, size),
-                Wrappers.<WeComMessageLog>lambdaQuery().orderByDesc(WeComMessageLog::getCreatedAt));
+                Wrappers.<WeComMessageLog>lambdaQuery().orderByDesc(WeComMessageLog::getCreatedAt)
+                        .orderByDesc(WeComMessageLog::getId));
         return ApiResponse.ok(new PageResult<>(result.getRecords(), result.getTotal(),
                 result.getCurrent(), result.getSize()));
     }

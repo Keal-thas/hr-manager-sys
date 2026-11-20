@@ -16,7 +16,7 @@
 
 ## 3. E2E + 前端设计 + agent 工作流 + 监控
 
-- Playwright E2E: 端口 18080, H2 内存库, 本地 Chrome, CI Chromium.
+- Playwright E2E: 端口 18080, 本机 MySQL 8 (`hr_e2e`), 本地 Chrome, CI Chromium.
 - `theme.js`, `AppLayout`, `ErrorBoundary`, 登录分栏, chunk 拆分, 交互元素 `data-testid`.
 - `agent-check.sh` 分 quick / standard / full.
 - 技术监控: Actuator + Micrometer + Prometheus, 只做技术指标; `ops/monitoring` 提供 Prometheus, Grafana 和告警.
@@ -31,7 +31,7 @@
 
 - `integration/wecom`: token 缓存, 异步推送, `SENT / FAILED / SKIPPED` 日志, 失败不影响站内消息.
 - 只做应用消息推送, 不做 SSO, 通讯录同步, 电子签名.
-- Flyway 取代手写 schema, H2 和 MySQL 双迁移, `MigrationConsistencyTest` 校验.
+- Flyway 取代手写 schema, 统一 MySQL 8, 单一 `db/migration/mysql` 迁移.
 - 企微内嵌视图属于规划, 见 `docs/WECOM.md` 第 13 节.
 
 ## 6. 文档收敛 + v1.0.1 公有发布
@@ -44,7 +44,7 @@
 
 - 未实现需求: 企微工作台员工自助, 企微身份登录, 企微 H5, 签字过程回溯, 管理员查看企微签名, 企微消息文案/跳转, 5000 量级性能验证. 见 `README.md` TODO.
 - 后续建议: 消息异步队列, 签名对象存储, 批量插入, 性能基线和压测.
-- ADR-013 统一 MySQL 已决定, 待实施.
+- ADR-013 统一 MySQL 已实施.
 
 ## 发布
 

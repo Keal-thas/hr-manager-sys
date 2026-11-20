@@ -21,8 +21,6 @@
         <java.version>1.8</java.version>
         <mybatis-plus.version>3.5.18.1</mybatis-plus.version>
         <poi.version>5.5.1</poi.version>
-        <h2.version>2.1.210</h2.version>
-        <testcontainers.version>1.21.4</testcontainers.version>
         <commons-lang3.version>3.17.0</commons-lang3.version>
         <druid.version>1.2.28</druid.version>
     </properties>
@@ -75,11 +73,6 @@
             <version>${druid.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.33</version>
@@ -107,18 +100,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>mysql</artifactId>
-            <version>${testcontainers.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

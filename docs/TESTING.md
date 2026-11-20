@@ -7,20 +7,13 @@
 ```text
 单元测试      密码规则, 前端响应拦截
 接口测试      @SpringBootTest + MockMvc, 覆盖主要 API
-一致性测试    H2 和 MySQL 迁移版本, 表, 列对比
 浏览器 E2E    Playwright 覆盖登录, 员工考勤, 管理员主流程
 监控测试      Actuator health, metrics, prometheus
 手工冒烟      发布前浏览器和接口检查
 ```
 
-后端集成测试使用:
+后端集成测试需要本机 MySQL 8, 每次运行创建临时 schema `hr_test_<runId>` 并清理历史残留, 启动时 Flyway 执行 `db/migration/mysql` 并运行 `DataInitializer`. 连接参数默认 `localhost:3306` 的 `root` 空密码, 可用 `TEST_DB_HOST` / `TEST_DB_PORT` / `TEST_DB_USER` / `TEST_DB_PASSWORD` 覆盖.
 
-```text
-src/test/resources/application-test.yml
-jdbc:h2:mem:hr_test
-```
-
-测试会自动执行 Flyway H2 迁移和 `DataInitializer`, 不依赖外部数据库.
 会修改数据的测试类使用 `@Transactional`, 每个用例结束后回滚.
 
 ## 2. 后端自动化测试
@@ -68,23 +61,10 @@ src/test/java/com/hrmanager/admin/AdminApiTests.java
   同级同名部门拒绝
   重复角色编码拒绝
 
-src/test/java/com/hrmanager/support/MigrationConsistencyTest.java
-  H2 和 MySQL 迁移版本一致
-  表名和列名一致
-  wecom_user_id 和 wecom_message_log 存在
-
 src/test/java/com/hrmanager/support/MonitoringApiTests.java
   /actuator/health 为 UP
   /actuator/prometheus 暴露 HTTP, JVM, 进程指标, 不含业务指标
   /actuator/metrics 目录可读
-
-src/test/java/com/hrmanager/support/MySqlSchemaIntegrationTests.java
-  Testcontainers 启动 MySQL 8
-  Flyway 执行 db/migration/mysql
-  DataInitializer 在 MySQL 下写入种子数据
-  管理员登录成功
-  校验 wecom_user_id 列
-  本机没有 Docker 时自动跳过, CI 会执行
 
 src/test/java/com/hrmanager/integration/wecom/WeComClientTest.java
   token 获取和缓存
@@ -147,7 +127,7 @@ src/main/resources/application-e2e.yml
 scripts/e2e-server.sh
 ```
 
-默认端口 `18080`, H2 内存库, 每次启动写入种子数据.
+默认端口 `18080`, 连接本机 MySQL 8 的 `hr_e2e` 库, `scripts/e2e-server.sh` 每次启动会重置该库并写入种子数据.
 本机默认使用系统 Chrome. CI 使用 `npx playwright install --with-deps chromium`.
 
 ## 4. 运行
@@ -212,9 +192,8 @@ target/site/jacoco/index.html
 - 纯逻辑可以写单元测试.
 - 需要写库的测试加 `@Transactional`, 避免用例互相影响.
 - 不要依赖测试执行顺序.
-- 不要依赖生产 `data/` 目录.
 - 不要在测试里使用真实密码或密钥.
-- 新增表或列时同时新增 H2 和 MySQL 迁移, `MigrationConsistencyTest` 会失败提醒.
+- 新增表或列时在 `db/migration/mysql` 新增迁移.
 
 ## 6. 常用测试类型
 
@@ -248,8 +227,7 @@ class SomeControllerTest {
 
 `.github/workflows/ci.yml`:
 
-- 后端 JDK 8: `mvn -B -ntp test`, 上传 surefire 和 JaCoCo 报告
-- GitHub Runner 有 Docker, `MySqlSchemaIntegrationTests` 会在 CI 执行
+- 后端 JDK 8: `mvn -B -ntp test`, 上传 surefire 和 JaCoCo 报告; job 起 MySQL 8 service 容器
 - 前端 Node 20: `npm ci`, `npm test`, `npm run build`
 - 校验 `src/main/resources/static` 没有被 git 跟踪
 - package job 下载前端产物后打包 jar 并上传
@@ -281,7 +259,7 @@ PR 必须等 CI 通过.
 ## 9. 已知缺口
 
 - 没有性能测试和压测基线
-- MySQL 集成测试依赖 Docker, 本地无 Docker 时会跳过
+- 后端测试依赖本机 MySQL 8
 - 没有 5000 条导入和 5000 人消息的压测
 - admin 路径权限映射需要随新接口维护
 - E2E 只覆盖 Chromium, 这是有意选择, 不做跨浏览器矩阵

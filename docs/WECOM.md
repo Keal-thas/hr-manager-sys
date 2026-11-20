@@ -242,8 +242,7 @@ AuthorizationApiTests
   员工不能访问 WeCom 管理接口
   HR 和管理员可以访问
 
-MySqlSchemaIntegrationTests
-  Flyway 创建 wecom_user_id 和 wecom_message_log
+后端集成测试在 MySQL 上校验 Flyway 创建 wecom_user_id 和 wecom_message_log.
 ```
 
 本地默认 `app.wecom.enabled=false`, 不会请求真实企业微信.

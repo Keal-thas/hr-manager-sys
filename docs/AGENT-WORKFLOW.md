@@ -30,7 +30,7 @@ git log --oneline -5
 - 主动提交并 push, 无需逐次确认
 - 先定位模块, 再读文件, 不要一上来全仓库搜索
 - 涉及前端先看 `web/src/views`, `web/src/layouts`, `web/src/api.js`
-- 涉及数据库先看 `db/migration` 和 `MigrationConsistencyTest`
+- 涉及数据库先看 `db/migration/mysql`
 
 ## 2. 任务分类
 
@@ -47,12 +47,12 @@ git log --oneline -5
 
 ### 2.2 数据库变更
 
-1. 在 `db/migration/h2` 和 `db/migration/mysql` 新增同版本迁移
+1. 在 `db/migration/mysql` 新增迁移
 2. 修改 entity / mapper
 3. 修改 `DataInitializer` (如果种子数据受影响)
 4. 补测试
 
-`MySqlSchemaIntegrationTests` 需要 Docker, 没有 Docker 时自动跳过. 必须保持 H2 和 MySQL 表名, 列名一致. 不修改已应用的迁移.
+后端测试需要本机 MySQL 8. 不修改已应用的迁移.
 
 ### 2.3 前端功能
 
@@ -125,7 +125,7 @@ git log --oneline -5
 - AntD 两个汉字的按钮可访问名会变成"保 存", E2E 用 `data-testid`
 - AntD Form 的 `getByLabel` 在 Modal 内要限定 modal 范围
 - 前端构建产物在 `src/main/resources/static`, 不要提交
-- H2 和 MySQL Flyway 迁移必须同步, 不修改已应用迁移
+- 数据库迁移只维护 `db/migration/mysql`, 不修改已应用迁移
 - JDK 8 不支持 `var`, records, text blocks, `List.of`
 - 新增 admin 接口时必须同步更新 `AuthInterceptor.requiredPermission`
 - 改动作业前先看 `git status`, 不要把用户未完成的改动一起格式化

@@ -208,9 +208,9 @@ E2E_INSTALL_BROWSER=1 bash scripts/agent-check.sh full
 E2E 使用 `application-e2e.yml`:
 
 ```text
-H2 内存库
+本机 MySQL 8 的 hr_e2e 库
 端口 18080
-每次启动重新建表和写入种子数据
+每次启动重置 hr_e2e 并写入种子数据
 ```
 
 覆盖:
