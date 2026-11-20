@@ -12,7 +12,7 @@
 手工冒烟      发布前浏览器和接口检查
 ```
 
-后端集成测试需要本机 MySQL 8, 每次运行创建临时 schema `hr_test_<runId>` 并清理历史残留, 启动时 Flyway 执行 `db/migration/mysql` 并运行 `DataInitializer`. 连接参数默认 `localhost:3306` 的 `root` 空密码, 可用 `TEST_DB_HOST` / `TEST_DB_PORT` / `TEST_DB_USER` / `TEST_DB_PASSWORD` 覆盖.
+后端集成测试需要本机 MySQL 8, 每次运行创建临时 schema `hr_test_<runId>` 并清理超过 6 小时的历史残留, 启动时 Flyway 执行 `db/migration/mysql` 并运行 `DataInitializer`. 连接参数默认 `localhost:3306` 的 `root` 空密码, 可用 `TEST_DB_HOST` / `TEST_DB_PORT` / `TEST_DB_USER` / `TEST_DB_PASSWORD` 覆盖.
 
 会修改数据的测试类使用 `@Transactional`, 每个用例结束后回滚.
 

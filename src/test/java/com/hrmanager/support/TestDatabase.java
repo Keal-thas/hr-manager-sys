@@ -5,10 +5,13 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public final class TestDatabase {
 
+    private static final int STALE_HOURS = 6;
     private static final String HOST = env("TEST_DB_HOST", "localhost");
     private static final String PORT = env("TEST_DB_PORT", "3306");
     private static final String USER = env("TEST_DB_USER", "root");
@@ -53,10 +56,18 @@ public final class TestDatabase {
     }
 
     private static void cleanupStale(Statement stmt) throws SQLException {
-        try (ResultSet rs = stmt.executeQuery("SHOW DATABASES LIKE 'hr_test_%'")) {
+        // 只清理超过 STALE_HOURS 的遗留库, 避免并行运行的测试互相删库
+        try (ResultSet rs = stmt.executeQuery(
+                "SELECT table_schema FROM information_schema.tables"
+                        + " WHERE table_schema LIKE 'hr\\_test\\_%'"
+                        + " GROUP BY table_schema"
+                        + " HAVING MIN(create_time) < NOW() - INTERVAL " + STALE_HOURS + " HOUR")) {
+            List<String> stale = new ArrayList<>();
             while (rs.next()) {
-                String name = rs.getString(1);
-                stmt.executeUpdate("DROP DATABASE " + name);
+                stale.add(rs.getString(1));
+            }
+            for (String name : stale) {
+                stmt.executeUpdate("DROP DATABASE `" + name + "`");
             }
         }
     }

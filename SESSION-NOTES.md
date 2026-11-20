@@ -10,7 +10,7 @@
 
 ## 2. 测试与质量门禁
 
-- 后端集成测试: Auth, Attendance, Notice, Admin, PasswordPolicy, MigrationConsistency, Monitoring.
+- 后端集成测试: Auth, Attendance, Notice, Admin, PasswordPolicy, Monitoring.
 - 前端单元测试, JaCoCo, Maven Enforcer, `scripts/check.sh`, pre-push.
 - CI: 后端 test, 前端 test/build, package job; tag 触发 `release.yml` 发 jar.
 
@@ -25,7 +25,7 @@
 
 - `AuthInterceptor` 对 `/api/admin/**` 按路径鉴权, 未映射路径默认拒绝.
 - `app.seed.enabled`, prod profile 关闭演示数据.
-- Testcontainers 启动 MySQL 8 真实执行迁移; Excel 上传 E2E.
+- Excel 上传 E2E.
 
 ## 5. 企业微信 + Flyway
 

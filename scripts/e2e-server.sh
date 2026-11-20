@@ -14,17 +14,18 @@ if [ ! -f src/main/resources/static/index.html ]; then
 fi
 
 if ! command -v mysql >/dev/null 2>&1; then
-  echo "[e2e] mysql client not found; skipping schema reset, assuming MySQL 8 is reachable"
-else
-  : "${DB_HOST:=localhost}"
-  : "${DB_PORT:=3306}"
-  : "${DB_NAME:=hr_e2e}"
-  : "${DB_USERNAME:=root}"
-  : "${DB_PASSWORD:=}"
-  echo "[e2e] resetting e2e schema"
-  mysql -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USERNAME" ${DB_PASSWORD:+-p"$DB_PASSWORD"} \
-    -e "DROP DATABASE IF EXISTS $DB_NAME;" 2>/dev/null || true
+  echo "[e2e] mysql client not found, cannot reset e2e schema; install it (e.g. brew install mysql-client)"
+  exit 1
 fi
+
+: "${DB_HOST:=localhost}"
+: "${DB_PORT:=3306}"
+: "${DB_NAME:=hr_e2e}"
+: "${DB_USERNAME:=root}"
+: "${DB_PASSWORD:=}"
+echo "[e2e] resetting e2e schema"
+mysql -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USERNAME" ${DB_PASSWORD:+-p"$DB_PASSWORD"} \
+  -e "DROP DATABASE IF EXISTS \`$DB_NAME\`;"
 
 echo "[e2e] starting backend on http://127.0.0.1:18080"
 exec mvn -B -ntp -q -DskipTests spring-boot:run \
