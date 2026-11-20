@@ -14,6 +14,13 @@ if [ -n "${GH_TOKEN:-}" ]; then
   gh auth setup-git >/dev/null 2>&1 || true
 fi
 
+if [ -n "${GIT_USER_NAME:-}" ]; then
+  git config --global user.name "$GIT_USER_NAME"
+fi
+if [ -n "${GIT_USER_EMAIL:-}" ]; then
+  git config --global user.email "$GIT_USER_EMAIL"
+fi
+
 if [ ! -d "$REPO_DIR/.git" ]; then
   echo "[init] cloning $GIT_URL"
   if [ -n "${GITHUB_TOKEN:-}" ]; then
