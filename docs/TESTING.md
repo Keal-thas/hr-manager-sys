@@ -235,11 +235,16 @@ bash scripts/agent-check.sh full
 
 `full` 会额外执行 Playwright E2E.
 
-覆盖率报告:
+覆盖率 (JaCoCo, 只报告, 不设门槛):
 
 ```text
-target/site/jacoco/index.html
+target/site/jacoco/index.html   人看, 逐类逐行标红绿黄
+target/site/jacoco/jacoco.csv   逐类数字
+target/site/jacoco/jacoco.xml   给外部平台读
+python3 scripts/coverage-summary.py   按模块汇总成 Markdown 表
 ```
+
+`mvn test` 自动生成. `target/` 不入库. CI 每次运行把汇总写进该次运行的 Summary 页, 并上传 `jacoco-report` 产物 (保留 30 天), 想看某次的明细去对应运行页下载.
 
 ## 5. 新增测试原则
 

@@ -52,13 +52,16 @@ jobs:
           name: surefire-reports
           path: target/surefire-reports
           retention-days: 7
+      - name: Coverage summary
+        if: always()
+        run: python3 scripts/coverage-summary.py >> "$GITHUB_STEP_SUMMARY"
       - name: Upload coverage report
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: jacoco-report
           path: target/site/jacoco
-          retention-days: 7
+          retention-days: 30
 
   frontend:
     name: Frontend (Node 20)
