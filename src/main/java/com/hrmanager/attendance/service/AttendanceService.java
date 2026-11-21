@@ -240,6 +240,7 @@ public class AttendanceService {
             record.setDepartmentName(deptNames.get(user.getDepartmentId()));
             record.setDataJson(excelService.toJson(row.getData()));
             record.setUpdatedAt(LocalDateTime.now());
+            // 待业务决策: 已确认员工被覆盖/修改后是否重置, 见 docs/REQUIREMENTS.md 决策 1
             if (!"CONFIRMED".equals(record.getStatus())) {
                 record.setStatus("UNREAD");
                 record.setAgree(false);
