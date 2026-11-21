@@ -28,7 +28,7 @@ public final class AttendanceSheetFixture {
 
     public static Object[] attendanceValues(String employeeNo, String name, String department,
                                             String absentDays, String overtimeHours) {
-        String[] values = new String[AttendanceExcelService.HEADERS.length];
+        Object[] values = new Object[AttendanceExcelService.HEADERS.length];
         for (int i = 0; i < values.length; i++) {
             values[i] = "0";
         }
@@ -51,6 +51,10 @@ public final class AttendanceSheetFixture {
         return String.join(",", PENALTY_HEADERS);
     }
 
+    public static String[] penaltyHeaderValues() {
+        return PENALTY_HEADERS.clone();
+    }
+
     public static String newPenaltyRow(String employeeNo, String name, String reason) {
         return penaltyRow("新增", "", employeeNo, name, reason);
     }
@@ -61,6 +65,11 @@ public final class AttendanceSheetFixture {
 
     public static String penaltyRow(String importType, String code, String employeeNo, String name,
                                     String reason) {
+        return join(penaltyValues(importType, code, employeeNo, name, reason));
+    }
+
+    public static String[] penaltyValues(String importType, String code, String employeeNo, String name,
+                                         String reason) {
         String[] values = new String[PENALTY_HEADERS.length];
         values[0] = importType;
         values[1] = code;
@@ -79,7 +88,7 @@ public final class AttendanceSheetFixture {
         values[14] = "";
         values[15] = "0";
         values[16] = "0";
-        return join(values);
+        return values;
     }
 
     private static String join(Object[] values) {

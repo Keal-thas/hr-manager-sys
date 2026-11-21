@@ -146,14 +146,7 @@ public class UserService {
     public SysUser update(Long id, SysUser body) {
         SysUser user = get(id);
         if (StringUtils.hasText(body.getEmployeeNo()) && !body.getEmployeeNo().equals(user.getEmployeeNo())) {
-            validateEmployeeNo(body.getEmployeeNo());
-            Long count = userMapper.selectCount(Wrappers.<SysUser>lambdaQuery()
-                    .eq(SysUser::getEmployeeNo, body.getEmployeeNo())
-                    .ne(SysUser::getId, id));
-            if (count > 0) {
-                throw new BusinessException("员工工号已存在，请修改后保存");
-            }
-            user.setEmployeeNo(body.getEmployeeNo());
+            throw new BusinessException("员工工号创建后不可修改");
         }
         if (StringUtils.hasText(body.getName())) {
             user.setName(body.getName());
