@@ -391,6 +391,7 @@ public class AttendanceService {
         List<PenaltyRow> rows = excelService.parsePenalty(file);
         Map<Long, String> deptNames = departmentService.nameMap();
         Map<String, Integer> seqs = new HashMap<>();
+        Map<String, Integer> existingCounts = new HashMap<>();
         for (PenaltyRow row : rows) {
             SysUser user = userService.findByEmployeeNo(row.getEmployeeNo());
             if (user == null) {
@@ -418,11 +419,15 @@ public class AttendanceService {
                     throw new BusinessException("编号" + row.getCode() + "与工号不匹配");
                 }
             } else {
-                long existing = penaltyMapper.selectCount(Wrappers.<AttendancePenalty>lambdaQuery()
-                        .eq(AttendancePenalty::getBatchId, batchId)
-                        .eq(AttendancePenalty::getEmployeeNo, row.getEmployeeNo()));
+                Integer existing = existingCounts.get(row.getEmployeeNo());
+                if (existing == null) {
+                    existing = (int) (long) penaltyMapper.selectCount(Wrappers.<AttendancePenalty>lambdaQuery()
+                            .eq(AttendancePenalty::getBatchId, batchId)
+                            .eq(AttendancePenalty::getEmployeeNo, row.getEmployeeNo()));
+                    existingCounts.put(row.getEmployeeNo(), existing);
+                }
                 int seq = seqs.merge(row.getEmployeeNo(), 1, Integer::sum);
-                int total = (int) existing + seq;
+                int total = existing + seq;
                 String code = row.getEmployeeNo() + String.format("%02d", batch.getBatchMonth())
                         + String.format("%03d", total);
                 penalty = new AttendancePenalty();
