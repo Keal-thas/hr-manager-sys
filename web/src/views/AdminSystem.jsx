@@ -346,7 +346,7 @@ export default function AdminSystem({ tab }) {
       <Modal title={editingUser ? '编辑用户' : '新增用户'} open={userOpen} onCancel={() => setUserOpen(false)} footer={null} width={620}>
         <Form form={userForm} layout="vertical" onFinish={saveUser}>
           <Form.Item name="employeeNo" label="工号" rules={[{ required: true, pattern: /^\d+$/, message: '工号必须为数字' }]}>
-            <Input />
+            <Input disabled={!!editingUser} data-testid="user-employee-no" />
           </Form.Item>
           <Form.Item name="name" label="姓名" rules={[{ required: true }]}>
             <Input />
