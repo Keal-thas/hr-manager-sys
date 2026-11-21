@@ -6,7 +6,7 @@ spring:
     name: hr-manager-sys
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
-    url: "jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:hr_dev}?useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true&sessionVariables=sql_mode='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION',time_zone='+08:00'&connectionTimeZone=Asia/Shanghai&forceConnectionTimeZoneToSession=true"
+    url: "jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:hr_dev}?useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true&sessionVariables=sql_mode='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION',time_zone='%2B08:00'&connectionTimeZone=Asia/Shanghai&forceConnectionTimeZoneToSession=true"
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWORD:}

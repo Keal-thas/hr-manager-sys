@@ -28,7 +28,7 @@ public final class TestDatabase {
             createSchema();
             url = "jdbc:mysql://" + HOST + ":" + PORT + "/" + SCHEMA
                     + "?useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true"
-                    + "&sessionVariables=sql_mode='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION',time_zone='+08:00'"
+                    + "&sessionVariables=sql_mode='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION',time_zone='%2B08:00'"
                     + "&connectionTimeZone=Asia/Shanghai&forceConnectionTimeZoneToSession=true";
         }
         return url;
