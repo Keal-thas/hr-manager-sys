@@ -46,12 +46,52 @@ src/test/java/com/hrmanager/attendance/AttendanceApiTests.java
   未勾选同意时拒绝确认
   非法月份拒绝上传
 
+src/test/java/com/hrmanager/attendance/AttendanceUploadApiTests.java
+  新增/覆盖/增量三种上传, 人数, 状态和数据
+  最新月份覆盖, 历史月份只增量
+  通知已生成/已调整, 历史增量不通知
+  非法月份/未来月份/上传方式/重复人员/未知工号/姓名不匹配
+
+src/test/java/com/hrmanager/attendance/AttendancePenaltyApiTests.java
+  编号为工号加两位月份加三位流水
+  修改按编号匹配, 限定在选定年月
+  编号不匹配时整批取消
+  工号必须在批次内, 姓名必须一致
+  覆盖上传清空处罚
+
+src/test/java/com/hrmanager/attendance/AttendanceStateMachineApiTests.java
+  未阅读 -> 已阅读 -> 已确认, 已确认不回退
+  确认需要同意和签名
+  线下补签仅非最新批次, 支持图片和 PDF
+  已确认记录不能补签
+
+src/test/java/com/hrmanager/attendance/AttendanceRemindApiTests.java
+  催办仅限最新批次
+  考勤提醒发给未确认的人
+  异常提醒只发未阅读且有处罚的人
+
+src/test/java/com/hrmanager/attendance/AttendanceExcelApiTests.java
+  文本和数值单元格混用, 前导零工号必须为文本
+  空行忽略, 缺失表头或必填列拒绝
+  数字格式和六位小数校验
+  处罚导入方式/编号/日期/月份/长度校验
+
+src/test/java/com/hrmanager/support/XlsxFixture.java
+src/test/java/com/hrmanager/support/AttendanceSheetFixture.java
+  在内存里生成 xlsx, 不提交二进制样例
+
 src/test/java/com/hrmanager/notice/NoticeMessageApiTests.java
   全员通知发布到 4 个有效用户
   员工收到通知消息
   未读数量和全部已读
   通知模板创建, 列表, 停用
   空标题拒绝发布
+
+src/test/java/com/hrmanager/notice/NoticeTargetApiTests.java
+  全员/部门/指定人员三种范围
+  停用用户不接收通知
+  消息详情即已读, 不能读他人消息
+  模板修改, 恢复, 校验
 
 src/test/java/com/hrmanager/admin/AdminApiTests.java
   部门树, 角色列表, 用户列表
@@ -60,6 +100,22 @@ src/test/java/com/hrmanager/admin/AdminApiTests.java
   有有效用户的部门不能删除
   同级同名部门拒绝
   重复角色编码拒绝
+
+src/test/java/com/hrmanager/admin/UserRuleApiTests.java
+  用户创建字段, 部门和角色校验
+  工号创建后不可修改
+  重置密码, 状态校验, 查询筛选
+  个人资料手机号和邮箱规则
+
+src/test/java/com/hrmanager/admin/RoleRuleApiTests.java
+  角色编码和名称必填, 权限默认空
+  更新, 停用, 不存在拒绝
+  停用角色不授予权限
+
+src/test/java/com/hrmanager/admin/DeptRuleApiTests.java
+  部门编码生成, 最多 5 级
+  同级同名拒绝
+  有子部门不能删除, 删除后不可再操作
 
 src/test/java/com/hrmanager/support/MonitoringApiTests.java
   /actuator/health 为 UP
