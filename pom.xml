@@ -194,4 +194,43 @@
             </plugin>
         </plugins>
     </build>
+
+    <!-- 代码异味和潜在 bug 报告. 默认构建不启用, 只出报告, 不让构建失败.
+         mvn -Pquality compile pmd:pmd pmd:cpd spotbugs:spotbugs
+         汇总: python3 scripts/quality-summary.py -->
+    <profiles>
+        <profile>
+            <id>quality</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-pmd-plugin</artifactId>
+                        <version>3.21.2</version>
+                        <configuration>
+                            <rulesets>
+                                <ruleset>config/pmd-ruleset.xml</ruleset>
+                            </rulesets>
+                            <targetJdk>${java.version}</targetJdk>
+                            <failOnViolation>false</failOnViolation>
+                            <printFailingErrors>false</printFailingErrors>
+                            <minimumTokens>100</minimumTokens>
+                            <includeTests>false</includeTests>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.github.spotbugs</groupId>
+                        <artifactId>spotbugs-maven-plugin</artifactId>
+                        <version>4.8.6.6</version>
+                        <configuration>
+                            <effort>Default</effort>
+                            <threshold>Medium</threshold>
+                            <failOnError>false</failOnError>
+                            <xmlOutput>true</xmlOutput>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
