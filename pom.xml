@@ -227,6 +227,7 @@
                             <threshold>Medium</threshold>
                             <failOnError>false</failOnError>
                             <xmlOutput>true</xmlOutput>
+                            <excludeFilterFile>config/spotbugs-exclude.xml</excludeFilterFile>
                         </configuration>
                     </plugin>
                 </plugins>

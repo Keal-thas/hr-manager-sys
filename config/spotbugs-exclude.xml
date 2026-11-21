@@ -1,0 +1,6 @@
+<FindBugsFilter>
+    <!-- Spring 注入和 DTO getter/setter 会触发大量这类提示, 对本项目是噪音 -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+    </Match>
+</FindBugsFilter>
