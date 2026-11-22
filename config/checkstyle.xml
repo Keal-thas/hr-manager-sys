@@ -8,10 +8,6 @@
     <property name="charset" value="UTF-8"/>
 
     <module name="FileTabCharacter"/>
-    <module name="LineLength">
-        <property name="max" value="140"/>
-        <property name="ignorePattern" value="^package\b.*|^import\b.*|href|https?://"/>
-    </module>
 
     <module name="TreeWalker">
         <module name="AvoidStarImport"/>
