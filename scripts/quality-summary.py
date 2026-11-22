@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Summarize PMD, CPD and SpotBugs reports as Markdown.
+"""Summarize Checkstyle, PMD, CPD and SpotBugs reports as Markdown.
 
-Run first: mvn -Pquality compile pmd:pmd pmd:cpd spotbugs:spotbugs
+Run first: mvn -Pquality compile checkstyle:checkstyle pmd:pmd pmd:cpd spotbugs:spotbugs
 Usage: python3 scripts/quality-summary.py
 Report only: never fails the build.
 """
@@ -10,6 +10,7 @@ import sys
 import xml.etree.ElementTree as ET
 from collections import Counter
 
+CHECKSTYLE = "target/checkstyle-result.xml"
 PMD = "target/pmd.xml"
 CPD = "target/cpd.xml"
 SPOTBUGS = "target/spotbugsXml.xml"
@@ -41,7 +42,21 @@ def table(title, header, rows):
     return out
 
 
-out = ["## Backend code quality (PMD / CPD / SpotBugs)"]
+out = ["## Backend code quality (Checkstyle / PMD / CPD / SpotBugs)"]
+
+cs = load(CHECKSTYLE)
+if cs is None:
+    out.append("\n_Checkstyle: no report._")
+else:
+    by_rule = Counter()
+    total = 0
+    for f in cs.iter("file"):
+        for v in f.iter("error"):
+            total += 1
+            by_rule[v.get("source", "").rsplit(".", 1)[-1]] += 1
+    out.append("\n**Checkstyle**: %d findings" % total)
+    if by_rule:
+        out += table("Top rules:", ["Rule", "Count"], by_rule.most_common(8))
 
 pmd = load(PMD)
 if pmd is None:

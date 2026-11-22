@@ -75,9 +75,9 @@ jobs:
           distribution: temurin
           java-version: '8'
           cache: maven
-      - name: PMD, CPD, SpotBugs
+      - name: Checkstyle, PMD, CPD, SpotBugs
         continue-on-error: true
-        run: mvn -B -ntp -Pquality compile pmd:pmd pmd:cpd spotbugs:spotbugs
+        run: mvn -B -ntp -Pquality compile checkstyle:checkstyle pmd:pmd pmd:cpd spotbugs:spotbugs
       - name: Quality summary
         if: always()
         run: python3 scripts/quality-summary.py >> "$GITHUB_STEP_SUMMARY"
@@ -87,6 +87,7 @@ jobs:
         with:
           name: quality-report
           path: |
+            target/checkstyle-result.xml
             target/pmd.xml
             target/cpd.xml
             target/spotbugsXml.xml

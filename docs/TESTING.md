@@ -246,14 +246,14 @@ python3 scripts/coverage-summary.py   按模块汇总成 Markdown 表
 
 `mvn test` 自动生成. `target/` 不入库. CI 每次运行把汇总写进该次运行的 Summary 页, 并上传 `jacoco-report` 产物 (保留 30 天), 想看某次的明细去对应运行页下载.
 
-代码异味 (PMD, CPD, SpotBugs, 只报告, 不设门槛, 默认构建不启用):
+静态检查 (Checkstyle, PMD, CPD, SpotBugs, 只报告, 不设门槛, 默认构建不启用):
 
 ```bash
-mvn -Pquality compile pmd:pmd pmd:cpd spotbugs:spotbugs
+mvn -Pquality compile checkstyle:checkstyle pmd:pmd pmd:cpd spotbugs:spotbugs
 python3 scripts/quality-summary.py
 ```
 
-规则在 `config/pmd-ruleset.xml`. CI 有独立的 `quality` job, 汇总写进运行的 Summary 页, 原始 XML 作为 `quality-report` 产物保留 30 天. 该 job 失败不影响整体结果.
+规则在 `config/checkstyle.xml`, `config/pmd-ruleset.xml`, `config/spotbugs-exclude.xml`. CI 有独立的 `quality` job, 汇总写进运行的 Summary 页, 原始 XML 作为 `quality-report` 产物保留 30 天. 该 job 失败不影响整体结果.
 
 ## 5. 新增测试原则
 

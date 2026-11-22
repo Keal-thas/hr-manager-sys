@@ -195,8 +195,8 @@
         </plugins>
     </build>
 
-    <!-- 代码异味和潜在 bug 报告. 默认构建不启用, 只出报告, 不让构建失败.
-         mvn -Pquality compile pmd:pmd pmd:cpd spotbugs:spotbugs
+    <!-- 风格, 代码异味和潜在 bug 报告. 默认构建不启用, 只出报告, 不让构建失败.
+         mvn -Pquality compile checkstyle:checkstyle pmd:pmd pmd:cpd spotbugs:spotbugs
          汇总: python3 scripts/quality-summary.py -->
     <profiles>
         <profile>
@@ -217,6 +217,26 @@
                             <minimumTokens>100</minimumTokens>
                             <includeTests>false</includeTests>
                         </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-checkstyle-plugin</artifactId>
+                        <version>3.3.1</version>
+                        <configuration>
+                            <configLocation>config/checkstyle.xml</configLocation>
+                            <includeTestSourceDirectory>false</includeTestSourceDirectory>
+                            <consoleOutput>true</consoleOutput>
+                            <failOnViolation>false</failOnViolation>
+                            <violationSeverity>warning</violationSeverity>
+                            <linkXRef>false</linkXRef>
+                        </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>com.puppycrawl.tools</groupId>
+                                <artifactId>checkstyle</artifactId>
+                                <version>9.3</version>
+                            </dependency>
+                        </dependencies>
                     </plugin>
                     <plugin>
                         <groupId>com.github.spotbugs</groupId>
