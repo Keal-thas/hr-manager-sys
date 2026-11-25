@@ -186,6 +186,17 @@ scripts/e2e-server.sh
 默认端口 `18080`, 连接本机 MySQL 8 的 `hr_e2e` 库, `scripts/e2e-server.sh` 每次启动会重置该库并写入种子数据.
 本机默认使用系统 Chrome. CI 使用 `npx playwright install --with-deps chromium`.
 
+另有一份 Python Playwright 示例, 放在 `py-e2e/`, 测试进程在 Docker 中运行, 不安装到本机:
+
+```bash
+bash py-e2e/run.sh
+bash py-e2e/run.sh --record -k walkthrough
+```
+
+它只演示元素定位, 显式等待, 表单操作和菜单跳转, 不是全量回归, 也不参与 CI. 默认探测宿主机 `http://127.0.0.1:18080`, 容器内改用 `host.docker.internal` 访问; 用 `E2E_BASE_URL` 指向其他地址, 仅容器网络内可达时再加 `PY_E2E_CONTAINER_BASE_URL` 或 `PY_E2E_SKIP_HOST_CHECK=1`.
+
+`--record` 会以 `--video=on --tracing=on --screenshot=on --slowmo=500` 运行, 产物写到 `py-e2e/artifacts/`, 含 webm 录屏和 Playwright trace.
+
 ## 4. 运行
 
 后端:
